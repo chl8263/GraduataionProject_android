@@ -6,9 +6,11 @@ import android.util.Log;
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 /**
  * Created by gyun_home on 2018-03-25.
@@ -57,6 +59,18 @@ public class PahoClient {
     public void publich(String msg){
         try {
             client.publish("aaa",msg.getBytes(),0,true);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+    public void subscribe(){
+        try {
+            client.subscribe("bbb", 0, new IMqttMessageListener() {
+                @Override
+                public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                    Log.e("mqtt subcribe",mqttMessage.getPayload().toString());
+                }
+            });
         } catch (MqttException e) {
             e.printStackTrace();
         }
