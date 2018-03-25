@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         pahoClient = PahoClient.getInstance();
         pahoClient.setContext(getApplicationContext());
-        pahoClient.start();
+        pahoClient.mqttConnect();
     }
 
     @Override

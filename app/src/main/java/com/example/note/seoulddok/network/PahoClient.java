@@ -20,7 +20,6 @@ public class PahoClient {
     private Context context;
     private MqttAndroidClient client;
     public PahoClient(){
-
     }
 
     private static class Holder{
@@ -29,10 +28,12 @@ public class PahoClient {
     public static PahoClient getInstance(){
         return Holder.instance;
     }
+
     public void setContext(Context context){
         this.context = context;
     }
-    public void  start(){
+
+    public void  mqttConnect(){
         client = new MqttAndroidClient(context, "tcp://192.168.219.111:1883", "and");
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
