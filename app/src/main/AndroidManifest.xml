@@ -20,7 +20,9 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBh7P7_nrfMJTrlONnvD4iGVZI8noufoT8" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/mainTheme"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,6 +30,8 @@
             </intent-filter>
         </activity>
         <service android:name=".service.LocaService"/>
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
     </application>
 
 </manifest>

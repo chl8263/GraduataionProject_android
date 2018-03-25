@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.SecondFragment;
 import com.example.note.seoulddok.ui.ThirdFragment;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private FirstFragment firstFragment;
     private SecondFragment secondFragment;
     private ThirdFragment thirdFragment;
-
+    private PahoClient pahoClient;
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         init();
         initFragment();
 
+        pahoClient = PahoClient.getInstance();
+        pahoClient.setContext(getApplicationContext());
+        pahoClient.start();
     }
 
     @Override

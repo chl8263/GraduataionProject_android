@@ -46,14 +46,14 @@ public class LocaService extends Service {
     public IBinder onBind(Intent intent) {
         Log.e("서비스 binder", "binder 시작");
 
-        locationProviderClient.getLastLocation().addOnCompleteListener((Executor) this, new OnCompleteListener<Location>() {
+       /* locationProviderClient.getLastLocation().addOnCompleteListener((Executor) this, new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
                 if(task.isSuccessful()&&task.getResult() != null){
                     Log.e("location",task.getResult().getLatitude()+task.getResult().getLongitude()+"");
                 }
             }
-        });
+        });*/
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -77,7 +77,7 @@ public class LocaService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        locationProviderClient= LocationServices.getFusedLocationProviderClient(getApplicationContext());
+        //locationProviderClient= LocationServices.getFusedLocationProviderClient(getApplicationContext());
     }
 
     @Override
