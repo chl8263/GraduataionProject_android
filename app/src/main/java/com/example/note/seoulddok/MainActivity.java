@@ -45,13 +45,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
+        pahoClient = PahoClient.getInstance();
+        pahoClient.setContext(getApplicationContext());
+        pahoClient.mqttConnect();
+
         checkPermision(Contact.PERMISSIONS);
         init();
         initFragment();
 
-        pahoClient = PahoClient.getInstance();
-        pahoClient.setContext(getApplicationContext());
-        pahoClient.mqttConnect();
+
     }
 
     @Override
@@ -128,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         secondFragment = SecondFragment.getInstance();
         thirdFragment = ThirdFragment.getInstance();
 
+        pahoClient.setFragemntInstance(firstFragment,secondFragment);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 

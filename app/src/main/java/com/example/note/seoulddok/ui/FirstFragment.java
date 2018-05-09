@@ -2,29 +2,28 @@ package com.example.note.seoulddok.ui;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Looper;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 
+import com.example.note.seoulddok.MainActivity;
 import com.example.note.seoulddok.R;
 import com.example.note.seoulddok.interfaces.LocaCallback;
+import com.example.note.seoulddok.interfaces.LocaShowCallback;
 import com.example.note.seoulddok.service.LocaService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -52,7 +51,7 @@ import java.util.Locale;
  * Created by gyun_home on 2018-03-18.
  */
 
-public class FirstFragment extends Fragment implements OnMapReadyCallback {
+public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaShowCallback{
     private MapView mapView = null;
     private GoogleMap map = null;
     LocaService locaService;
@@ -118,7 +117,19 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback {
 
 
     }
+    @Override
+    public void notified(String msg) {
+        Log.e(">>>>>>.",msg);
 
+        Toast.makeText(getActivity().getApplicationContext(),msg,Toast.LENGTH_SHORT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity().getApplicationContext());
+        builder.setSmallIcon(R.drawable.global).setContentTitle("aaa").setContentText(msg);
+        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0,builder.build());
+
+
+    }
 
     LocaCallback locaCallback = new LocaCallback() {
         @Override
@@ -221,5 +232,6 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback {
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
 
 }

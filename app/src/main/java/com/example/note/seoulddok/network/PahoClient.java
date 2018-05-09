@@ -3,6 +3,9 @@ package com.example.note.seoulddok.network;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.note.seoulddok.ui.FirstFragment;
+import com.example.note.seoulddok.ui.SecondFragment;
+
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -17,6 +20,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
  */
 
 public class PahoClient {
+    private FirstFragment firstFragment;
+    private SecondFragment secondFragment;
     private Context context;
     private MqttAndroidClient client;
     public PahoClient(){
@@ -29,6 +34,10 @@ public class PahoClient {
         return Holder.instance;
     }
 
+    public void setFragemntInstance(FirstFragment fragemntInstance , SecondFragment secondFragment){
+        this.firstFragment = fragemntInstance;
+        this.secondFragment = secondFragment;
+    }
     public void setContext(Context context){
         this.context = context;
     }
@@ -70,6 +79,7 @@ public class PahoClient {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                     Log.e("subscribe ===>"+topic,new String(mqttMessage.getPayload()));
+                    firstFragment.notified(new String(mqttMessage.getPayload()));
                 }
             });
         } catch (MqttException e) {
