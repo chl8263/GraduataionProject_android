@@ -34,7 +34,7 @@ public class PahoClient {
     }
 
     public void  mqttConnect(){
-        client = new MqttAndroidClient(context, "tcp://192.168.219.111:1883", "and");
+        client = new MqttAndroidClient(context, "tcp://192.168.0.2:1883", "and");
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
@@ -64,12 +64,12 @@ public class PahoClient {
             e.printStackTrace();
         }
     }
-    public void subscribe(){
+    public void subscribe(final String topic){
         try {
-            client.subscribe("bbb", 0, new IMqttMessageListener() {
+            client.subscribe(topic, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    Log.e("mqtt subcribe",mqttMessage.getPayload().toString());
+                    Log.e("subscribe ===>"+topic,new String(mqttMessage.getPayload()));
                 }
             });
         } catch (MqttException e) {

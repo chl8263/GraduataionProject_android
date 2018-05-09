@@ -52,16 +52,17 @@ import java.util.Locale;
  * Created by gyun_home on 2018-03-18.
  */
 
-public class FirstFragment extends Fragment implements OnMapReadyCallback{
+public class FirstFragment extends Fragment implements OnMapReadyCallback {
     private MapView mapView = null;
-    private GoogleMap map =null;
+    private GoogleMap map = null;
     LocaService locaService;
 
     boolean isService = false;
 
-    FusedLocationProviderClient mFusedLocationClient;
-    LocationCallback mLocationCallback;
-    Geocoder geocoder= null;
+
+    //FusedLocationProviderClient mFusedLocationClient;
+    //LocationCallback mLocationCallback;
+    //Geocoder geocoder = null;
 
 
     ServiceConnection connection = new ServiceConnection() {
@@ -82,6 +83,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
     public FirstFragment() {
 
     }
+
     public static FirstFragment getInstance() {
         Bundle args = new Bundle();
         FirstFragment fragment = new FirstFragment();
@@ -96,9 +98,9 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
         mapView = (MapView) view.findViewById(R.id.Map);
         mapView.getMapAsync(this);
 
-        mFusedLocationClient
-                = LocationServices.getFusedLocationProviderClient(getContext());
-        geocoder = new Geocoder(getContext(), Locale.KOREA);
+        /*mFusedLocationClient
+                = LocationServices.getFusedLocationProviderClient(getContext());*/
+        //geocoder = new Geocoder(getContext(), Locale.KOREA);
         return view;
     }
 
@@ -112,17 +114,19 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
         }
         Intent intent = new Intent(getContext(), LocaService.class);
         getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        startLocationUpdates();
+        //startLocationUpdates();
 
 
     }
 
 
-
     LocaCallback locaCallback = new LocaCallback() {
         @Override
-        public void recv_loca(String location) {
-            Log.e("locaCallback", location);
+        public void recv_loca(String location, LatLng NOW) {
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NOW, 15);
+            map.clear(); //마커지우기
+            map.addMarker(new MarkerOptions().position(NOW).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
+            map.animateCamera(cameraUpdate);
         }
     };
 
@@ -130,7 +134,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
     }
-    private void startLocationUpdates() {
+
+    /*private void startLocationUpdates() {
 
         LocationRequest locRequest = new LocationRequest();
         locRequest.setInterval(3000);
@@ -164,7 +169,6 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
                         Address address = (Address) list.get(0);
                         String a = address.getAddressLine(0);
                         Log.e("noww",""+a+","+d1+","+d2);
-
                     }
                 }
 
@@ -180,7 +184,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback{
             return;
         }
         mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());
-    }
+    }*/
     @Override
     public void onStart() {
         super.onStart();
