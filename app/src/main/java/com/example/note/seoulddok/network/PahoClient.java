@@ -3,6 +3,8 @@ package com.example.note.seoulddok.network;
 import android.content.Context;
 import android.util.Log;
 
+import com.example.note.seoulddok.Contact;
+import com.example.note.seoulddok.Model.RecvData;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.SecondFragment;
 
@@ -11,9 +13,14 @@ import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by gyun_home on 2018-03-25.
@@ -24,6 +31,8 @@ public class PahoClient {
     private SecondFragment secondFragment;
     private Context context;
     private MqttAndroidClient client;
+
+
     public PahoClient(){
     }
 
@@ -43,7 +52,7 @@ public class PahoClient {
     }
 
     public void  mqttConnect(){
-        client = new MqttAndroidClient(context, "tcp://192.168.0.2:1883", "and");
+        client = new MqttAndroidClient(context, "tcp://192.168.0.2:1883", MqttClient.generateClientId());
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
@@ -51,7 +60,7 @@ public class PahoClient {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     client.setBufferOpts(getDisconnectedBufferOptions());
                     Log.e("Connect_success", "Success");
-
+                    Log.e("client__id",client.getClientId());
                 }
 
                 @Override
@@ -78,8 +87,24 @@ public class PahoClient {
             client.subscribe(topic, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    Log.e("subscribe ===>"+topic,new String(mqttMessage.getPayload()));
+                    String msg = new String(mqttMessage.getPayload());
+                    String time = "";
+                    time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis()));
+
+                    Contact.dbManager.insertMobileData(time,msg);
+                    Log.e("subscribe ===>"+topic,msg);
+
+                    ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+                    for(int i=0;i<recvData.size();i++) {
+                        Log.e("chchchch", recvData.get(i).getTime()+"--"+recvData.get(i).getMessage());
+                    }
+
+
                     firstFragment.notified(new String(mqttMessage.getPayload()));
+
+
+
                 }
             });
         } catch (MqttException e) {

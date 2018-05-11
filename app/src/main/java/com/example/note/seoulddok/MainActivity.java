@@ -2,6 +2,7 @@ package com.example.note.seoulddok;
 
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
 
+import com.example.note.seoulddok.DB.DBManager;
 import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.SecondFragment;
@@ -38,12 +40,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SecondFragment secondFragment;
     private ThirdFragment thirdFragment;
     private PahoClient pahoClient;
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+        Contact.dbManager = new DBManager(getApplicationContext(),"SOUEL_DDOK",null,1); //db 초기화
+
+        Contact.dbManager.createTableMobile();
+        Contact.dbManager.createTableCar();
 
         pahoClient = PahoClient.getInstance();
         pahoClient.setContext(getApplicationContext());
@@ -113,7 +121,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.navi_first:
-                        SelectNavView("first");
+                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                            SelectNavView("second");
+                        }else {
+                            SelectNavView("first");
+                        }
                         return true;
                     case R.id.navi_second:
                         SelectNavView("second");

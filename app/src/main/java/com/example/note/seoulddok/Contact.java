@@ -1,10 +1,15 @@
 package com.example.note.seoulddok;
 
+import com.example.note.seoulddok.DB.DBManager;
+
 /**
  * Created by gyun_home on 2018-03-18.
  */
 
 public class Contact {
+
+    public static DBManager dbManager;
+
     public static final String[] PERMISSIONS = {
             "android.permission.MODIFY_AUDIO_SETTINGS",
             "android.permission.ACCESS_NETWORK_STATE",

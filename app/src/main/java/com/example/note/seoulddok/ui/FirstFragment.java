@@ -128,7 +128,6 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaS
         NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0,builder.build());
 
-
     }
 
     LocaCallback locaCallback = new LocaCallback() {
