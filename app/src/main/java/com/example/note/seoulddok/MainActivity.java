@@ -2,6 +2,7 @@ package com.example.note.seoulddok;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -22,6 +23,7 @@ import android.view.Window;
 import android.widget.Toast;
 
 import com.example.note.seoulddok.DB.DBManager;
+import com.example.note.seoulddok.dialog.BluetoothDialog;
 import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.FirstFragment_land;
@@ -76,6 +78,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.sub_fab2:
+                Intent intent = new Intent(this, BluetoothDialog.class);
+                startActivity(intent);
+                break;
+        }
 
     }
 
@@ -189,11 +197,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.navi_first:
-                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                        SelectNavView("first");
+                        /*if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                             SelectNavView("first_land");
                         }else {
                             SelectNavView("first");
-                        }
+                        }*/
                         return true;
                     case R.id.navi_second:
                         SelectNavView("second");
@@ -209,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firstFragment = FirstFragment.getInstance();
         secondFragment = SecondFragment.getInstance();
         thirdFragment = ThirdFragment.getInstance();
-        //firstFragment_land  = FirstFragment_land.getInstance();
+        firstFragment_land  = FirstFragment_land.getInstance();
 
         pahoClient.setFragemntInstance(firstFragment,secondFragment);
 
@@ -217,11 +226,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.add(R.id.fragment, firstFragment, "first");
-        //fragmentTransaction.add(R.id.fragment, firstFragment_land, "first_land");
+        fragmentTransaction.add(R.id.fragment, firstFragment_land, "first_land");
         fragmentTransaction.add(R.id.fragment, secondFragment, "second");
         fragmentTransaction.add(R.id.fragment, thirdFragment, "third");
 
-        //fragmentTransaction.hide(firstFragment_land);
+        fragmentTransaction.hide(firstFragment_land);
         fragmentTransaction.hide(secondFragment);
         fragmentTransaction.hide(thirdFragment);
         fragmentTransaction.commit();

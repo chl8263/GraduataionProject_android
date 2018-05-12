@@ -61,8 +61,8 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
             case HEADER:
                 final HeaderViewHolder itemController = (HeaderViewHolder) holder;
                 itemController.redderalItem = item;
-                Log.e("########",item.text);
-                itemController.header_title.setText(item.text);
+                Log.e("########",item.date);
+                itemController.header_title.setText(item.date);
                 if (item.invisibleChildren == null) {
                     //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_minus);
                 } else {
@@ -82,6 +82,9 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                             }
                             notifyItemRangeRemoved(pos + 1, count);
                             //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_plus);
+                            itemController.btn_expand_toggle.animate().rotationBy(-450);
+
+
                         } else {
                             int pos = data.indexOf(itemController.redderalItem);
                             int index = pos + 1;
@@ -90,7 +93,7 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                                 index++;
                             }
                             notifyItemRangeInserted(pos + 1, index - pos - 1);
-                            //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_minus);
+                            itemController.btn_expand_toggle.animate().rotationBy(450);
                             item.invisibleChildren = null;
                         }
                     }
@@ -98,7 +101,9 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                 break;
             case CHILD:
                 final ChildViewHolder itemChild_Controller = (ChildViewHolder) holder;
-                itemChild_Controller.textView.setText(data.get(position).text);
+                itemChild_Controller.childTime.setText(data.get(position).time);
+                itemChild_Controller.childMsg.setText(data.get(position).message);
+
                /* if (data.get(position).i==NONEXISTENCE){
                     itemChild_Controller.imageView.setImageResource(R.drawable.no_video);
                 }else if(data.get(position).i==EXISTENCE){
@@ -149,32 +154,34 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
     }
 
     public class ChildViewHolder extends RecyclerView.ViewHolder{
-        public TextView textView;
-        public ImageView imageView;
+        public TextView childTime;
+        public TextView childMsg;
+
         public ChildViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.child_name);
-            imageView = (ImageView) itemView.findViewById(R.id.child_btn);
+            childTime = itemView.findViewById(R.id.chile_time);
+            childMsg =  itemView.findViewById(R.id.child_message);
         }
     }
     public static class Item {
         public int type;
-        public String text;
-        public int i;
+        public String date;
+        public String time;
+        public String message;
         public List<Item> invisibleChildren;
 
         public Item() {
 
         }
 
-        public Item(int type, String text) {
+        public Item(int type, String date) {
             this.type = type;
-            this.text = text;
+            this.date = date;
         }
-        public Item(int type, String text,int i) {
+        public Item(int type, String time,String message) {
             this.type = type;
-            this.text = text;
-            this.i=i;
+            this.time = time;
+            this.message = message;
         }
     }
 }

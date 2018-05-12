@@ -5,20 +5,18 @@
     android:orientation="horizontal"
     >
 
-    <FrameLayout
-        android:id="@+id/firstfragemnt_land"
+    <com.google.android.gms.maps.MapView
+        android:layout_weight="1"
+        android:id="@+id/Map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         />
     <TextView
+        android:id="@+id/notiText"
+        android:textSize="20sp"
         android:gravity="center"
-        android:textAlignment="center"
-        android:text="asdasd"
-        android:textSize="25sp"
-        android:textColor="@color/colorBalck"
-        android:layout_weight="1"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_weight="1"
         />
 </LinearLayout>

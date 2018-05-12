@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Looper;
@@ -104,8 +105,10 @@ public class LocaService extends Service {
     }
 
     private void startLocationUpdates() {
+        MyAsync myAsync = new MyAsync();
+        myAsync.execute();
 
-        LocationRequest locRequest = new LocationRequest();
+       /* LocationRequest locRequest = new LocationRequest();
         locRequest.setInterval(3000);
         locRequest.setFastestInterval(1500);
         locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -153,6 +156,69 @@ public class LocaService extends Service {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());
+        mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());*/
+    }
+    private class MyAsync extends AsyncTask{
+        LocationRequest locRequest = new LocationRequest();
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            locRequest.setInterval(3000);
+            locRequest.setFastestInterval(1500);
+            locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+
+                    Log.e("now",locationResult.getLastLocation().getLatitude()+" "+locationResult.getLastLocation().getLongitude());
+
+                    List<Address> list = null;
+                    double d1 = 0;
+                    double d2 = 0;
+                    try {
+                        d1 =locationResult.getLastLocation().getLatitude();
+                        d2 =locationResult.getLastLocation().getLongitude();
+
+
+                        list = geocoder.getFromLocation(
+                                d1, // 위도
+                                d2, // 경도
+                                10); // 얻어올 값의 개수
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (list != null) {
+                        if (list.size()==0) {
+                        } else {
+                            Address address = (Address) list.get(0);
+                            String a = address.getAddressLine(0);
+                            String aa = address.getSubLocality();   // 구 알아오는 코드
+                            if(aa != null){
+                                pahoClient.subscribe(aa);
+                                Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ",aa);
+                                Log.e("noww",""+a+","+d1+","+d2);
+                            }
+
+                        }
+                    }
+                    LatLng NOW = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                    locaCallback.recv_loca("a", NOW);
+
+                }
+            };
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+
+            return null;
+        }
+
+        @SuppressLint("MissingPermission")
+        @Override
+        protected void onPostExecute(Object o) {
+            mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());
+
+
+        }
     }
 }

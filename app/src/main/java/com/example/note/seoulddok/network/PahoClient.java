@@ -1,7 +1,9 @@
 package com.example.note.seoulddok.network;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.Log;
+import android.view.OrientationEventListener;
 
 import com.example.note.seoulddok.Contact;
 import com.example.note.seoulddok.Model.RecvData;
@@ -52,7 +54,7 @@ public class PahoClient {
     }
 
     public void  mqttConnect(){
-        client = new MqttAndroidClient(context, "tcp://192.168.219.100:1883", MqttClient.generateClientId());
+        client = new MqttAndroidClient(context, "tcp://"+Contact.connectIp+":1883", MqttClient.generateClientId());
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
@@ -96,13 +98,23 @@ public class PahoClient {
                     Contact.dbManager.insertMobileData(date,time,msg);
                     Log.e("subscribe ===>"+topic,msg);
 
-                    ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+                    final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
 
-                    for(int i=0;i<recvData.size();i++) {
-                        Log.e("chchchch", recvData.get(i).getDate()+"&&"+recvData.get(i).getTime()+"&&"+recvData.get(i).getMessage());
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            for(int i=0;i<recvData.size();i++) {
+                                Log.e("chchchch", recvData.get(i).getDate()+"&&"+recvData.get(i).getTime()+"&&"+recvData.get(i).getMessage());
+                            }
+                        }
+                    }).start();
+
+                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+                        firstFragment.notified(new String(mqttMessage.getPayload()));
+                    }else {
+                        firstFragment.noti_landscape(msg);
                     }
 
-                    firstFragment.notified(new String(mqttMessage.getPayload()));
 
 
 

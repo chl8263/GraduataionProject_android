@@ -29,6 +29,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".dialog.BluetoothDialog"
+            android:theme="@style/Theme.AppCompat.Dialog"
+            />
         <service android:name=".service.LocaService"/>
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 

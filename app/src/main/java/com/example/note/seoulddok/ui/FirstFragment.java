@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -58,7 +59,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaS
 
     boolean isService = false;
 
-
+    private TextView notiText ;
     //FusedLocationProviderClient mFusedLocationClient;
     //LocationCallback mLocationCallback;
     //Geocoder geocoder = null;
@@ -96,6 +97,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaS
         View view = inflater.inflate(R.layout.firstfragment, container, false);
         mapView = (MapView) view.findViewById(R.id.Map);
         mapView.getMapAsync(this);
+        notiText = view.findViewById(R.id.notiText);
 
         /*mFusedLocationClient
                 = LocationServices.getFusedLocationProviderClient(getContext());*/
@@ -121,12 +123,18 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaS
     public void notified(String msg) {
         Log.e(">>>>>>.",msg);
 
-        Toast.makeText(getActivity().getApplicationContext(),msg,Toast.LENGTH_SHORT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity().getApplicationContext());
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
         builder.setSmallIcon(R.drawable.global).setContentTitle("aaa").setContentText(msg);
-        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(getActivity().NOTIFICATION_SERVICE);
         notificationManager.notify(0,builder.build());
+
+    }
+
+    @Override
+    public void noti_landscape(String msg) {
+        Log.e("first_landscape-->",msg);
+
+        notiText.setText(msg);
 
     }
 
