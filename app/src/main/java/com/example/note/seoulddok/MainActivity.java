@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         Contact.dbManager = new DBManager(getApplicationContext(),"SOUEL_DDOK",null,1); //db 초기화
-
+        /*Contact.dbManager.dropMobileTable();
+        Contact.dbManager.dropCarTable();*/
         Contact.dbManager.createTableMobile();
         Contact.dbManager.createTableCar();
 

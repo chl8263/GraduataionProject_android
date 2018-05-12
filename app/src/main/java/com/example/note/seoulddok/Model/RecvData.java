@@ -1,31 +1,44 @@
 package com.example.note.seoulddok.Model;
 
 public class RecvData {
-    private String Classification;
-    private String Time;
+    private int id;
+    private String date;
+    private String time;
     private String message;
 
-    public RecvData(String mobile, String classification, String time, String message) {
-        Classification = classification;
-        Time = time;
+    public RecvData(int id, String date, String time, String message) {
+        this.id = id;
+        this.date = date;
+        this.time = time;
         this.message = message;
     }
 
-    public String getClassification() {
-        return Classification;
+    public String getDate() {
+        return date;
     }
 
-    public void setClassification(String classification) {
-        Classification = classification;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public String getTime() {
-        return Time;
+        return time;
     }
 
     public void setTime(String time) {
-        Time = time;
+        this.time = time;
     }
+
+    public int id() {
+        return id;
+    }
+
+
+    public void setClassification(int id) {
+        this.id = id;
+    }
+
+
 
     public String getMessage() {
         return message;

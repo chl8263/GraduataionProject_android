@@ -89,17 +89,18 @@ public class PahoClient {
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                     String msg = new String(mqttMessage.getPayload());
                     String time = "";
-                    time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(System.currentTimeMillis()));
+                    String date ="";
+                    date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                    time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                    Contact.dbManager.insertMobileData(time,msg);
+                    Contact.dbManager.insertMobileData(date,time,msg);
                     Log.e("subscribe ===>"+topic,msg);
 
                     ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
 
                     for(int i=0;i<recvData.size();i++) {
-                        Log.e("chchchch", recvData.get(i).getTime()+"--"+recvData.get(i).getMessage());
+                        Log.e("chchchch", recvData.get(i).getDate()+"&&"+recvData.get(i).getTime()+"&&"+recvData.get(i).getMessage());
                     }
-
 
                     firstFragment.notified(new String(mqttMessage.getPayload()));
 

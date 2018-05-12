@@ -3,11 +3,24 @@ package com.example.note.seoulddok.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.note.seoulddok.Adapter.HistoryRecyclerAdapter;
+import com.example.note.seoulddok.Contact;
+import com.example.note.seoulddok.Model.ExChild;
+import com.example.note.seoulddok.Model.ExParent;
+import com.example.note.seoulddok.Model.ExpandableItem;
+import com.example.note.seoulddok.Model.RecvData;
 import com.example.note.seoulddok.R;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -15,6 +28,10 @@ import com.example.note.seoulddok.R;
  */
 
 public class SecondFragment extends Fragment {
+    public  final int HEADER = 0;
+    public  final int CHILD = 1;
+    private RecyclerView recyclerView;
+    ArrayList<HistoryRecyclerAdapter.Item> data = new ArrayList<>();
 
     public SecondFragment() {
 
@@ -29,6 +46,34 @@ public class SecondFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.secondfragment,container,false);
+        setRecyclercView();
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(),LinearLayoutManager.VERTICAL,false));
+        recyclerView.setAdapter(new HistoryRecyclerAdapter(data,view.getContext()));
         return view;
+    }
+
+    public void setRecyclercView(){
+        ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+        ArrayList<String> header = new ArrayList<String>();
+        HashMap<String, String> checkTitle = new HashMap<String, String>();
+
+        int check = -1;
+
+        for(int i=0;i<recvData.size();i++){
+            if(!checkTitle.containsKey(recvData.get(i).getDate())){
+                String title = recvData.get(i).getDate();
+                checkTitle.put(title,title);
+                data.add(new HistoryRecyclerAdapter.Item(HEADER,title));
+                check++;
+                data.get(check).invisibleChildren = new ArrayList<>();
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getMessage()));
+            }else{
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getMessage()));
+            }
+
+        }
+
     }
 }
