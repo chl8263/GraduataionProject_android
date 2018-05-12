@@ -52,7 +52,7 @@ public class PahoClient {
     }
 
     public void  mqttConnect(){
-        client = new MqttAndroidClient(context, "tcp://192.168.0.2:1883", MqttClient.generateClientId());
+        client = new MqttAndroidClient(context, "tcp://192.168.219.100:1883", MqttClient.generateClientId());
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {

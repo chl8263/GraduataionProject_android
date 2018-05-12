@@ -1,5 +1,6 @@
 package com.example.note.seoulddok;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -10,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 import com.example.note.seoulddok.DB.DBManager;
 import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
+import com.example.note.seoulddok.ui.FirstFragment_land;
 import com.example.note.seoulddok.ui.SecondFragment;
 import com.example.note.seoulddok.ui.ThirdFragment;
 
@@ -37,9 +40,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int MY_PERMISSION_REQUEST_STORAGE = 100;
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener;
     private FirstFragment firstFragment;
+    private FirstFragment_land firstFragment_land;
     private SecondFragment secondFragment;
     private ThirdFragment thirdFragment;
     private PahoClient pahoClient;
+
+    private FloatingActionButton main_fab, sub_fab1 , sub_fab2;
+    private boolean isFABOpen=false;
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -59,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         checkPermision(Contact.PERMISSIONS);
         init();
+        initFab();
         initFragment();
 
 
@@ -73,6 +82,64 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public void initFab(){
+        main_fab = findViewById(R.id.main_fab);
+        sub_fab1 = findViewById(R.id.sub_fab1);
+        sub_fab2 = findViewById(R.id.sub_fab2);
+        sub_fab1.setOnClickListener(this);
+        sub_fab2.setOnClickListener(this);
+        main_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isFABOpen){
+                    showFABMenu();
+                }else{
+                    closeFABMenu();
+                }
+            }
+        });
+    }
+    private void showFABMenu(){
+        isFABOpen=true;
+        sub_fab1.setVisibility(View.VISIBLE);
+        sub_fab2.setVisibility(View.VISIBLE);
+
+        main_fab.animate().rotationBy(135);
+        sub_fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
+        sub_fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_100));
+    }
+
+    private void closeFABMenu(){
+        isFABOpen=false;
+        main_fab.animate().rotationBy(-135);
+        sub_fab1.animate().translationY(0);
+        sub_fab2.animate().translationY(0);
+        main_fab.animate().translationY(0).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                if(!isFABOpen){
+                    sub_fab1.setVisibility(View.GONE);
+                    sub_fab2.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+    }
     @Override
     public void onBackPressed() {
         long tempTime = System.currentTimeMillis();
@@ -122,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switch (item.getItemId()) {
                     case R.id.navi_first:
                         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                            SelectNavView("second");
+                            SelectNavView("first_land");
                         }else {
                             SelectNavView("first");
                         }
@@ -141,14 +208,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firstFragment = FirstFragment.getInstance();
         secondFragment = SecondFragment.getInstance();
         thirdFragment = ThirdFragment.getInstance();
+        //firstFragment_land  = FirstFragment_land.getInstance();
 
         pahoClient.setFragemntInstance(firstFragment,secondFragment);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.add(R.id.fragment, firstFragment, "first");
+        //fragmentTransaction.add(R.id.fragment, firstFragment_land, "first_land");
         fragmentTransaction.add(R.id.fragment, secondFragment, "second");
         fragmentTransaction.add(R.id.fragment, thirdFragment, "third");
+
+        //fragmentTransaction.hide(firstFragment_land);
         fragmentTransaction.hide(secondFragment);
         fragmentTransaction.hide(thirdFragment);
         fragmentTransaction.commit();
