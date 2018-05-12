@@ -69,6 +69,7 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                     //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_plus);
                 }
                 itemController.btn_expand_toggle.setOnClickListener(new View.OnClickListener() {
+
                     @Override
                     public void onClick(View v) {
                         if (item.invisibleChildren == null) {
