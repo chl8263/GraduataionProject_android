@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -48,6 +49,7 @@ public class LocaService extends Service {
 
     private PahoClient pahoClient = PahoClient.getInstance();
 
+    private MyAsync myAsync = new MyAsync();
 
     private FusedLocationProviderClient mFusedLocationClient;
     private Geocoder geocoder= null;
@@ -76,7 +78,7 @@ public class LocaService extends Service {
         mFusedLocationClient
                 = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
-
+        Log.e("????????","?????/////");
         startLocationUpdates();
 
         return iBinder;
@@ -96,7 +98,9 @@ public class LocaService extends Service {
 
         return super.onStartCommand(intent, flags, startId);
     }
-
+    public void stopLocaService(ServiceConnection connection){
+        unbindService(connection);
+    }
     @Override
     public void onDestroy() {
         Log.e("서비스 destory","서비스 종료");
@@ -105,7 +109,6 @@ public class LocaService extends Service {
     }
 
     private void startLocationUpdates() {
-        MyAsync myAsync = new MyAsync();
         myAsync.execute();
 
        /* LocationRequest locRequest = new LocationRequest();
@@ -158,8 +161,14 @@ public class LocaService extends Service {
         }
         mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());*/
     }
+
+    public void stopServiceThread(){
+        //myAsync.cancel();
+
+    }
     private class MyAsync extends AsyncTask{
         LocationRequest locRequest = new LocationRequest();
+
         @Override
         protected Object doInBackground(Object[] objects) {
             locRequest.setInterval(3000);

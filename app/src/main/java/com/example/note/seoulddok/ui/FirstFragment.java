@@ -119,6 +119,14 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback ,LocaS
 
 
     }
+
+    public void disconnectService(){
+        getContext().unbindService(connection);
+        locaService.stopServiceThread();
+        //locaService.stopServiceThread(connection);
+        //locaService.stopLocaService(connection);
+    }
+
     @Override
     public void notified(String msg) {
         Log.e(">>>>>>.",msg);

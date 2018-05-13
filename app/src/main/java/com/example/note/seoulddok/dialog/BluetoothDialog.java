@@ -18,6 +18,9 @@ import com.example.note.seoulddok.R;
  */
 
 public class BluetoothDialog extends AppCompatActivity implements View.OnClickListener {
+    private final int BLUETOOTH_OK = 200;
+    private final int BLUETOOTH_NO = 300;
+
     private TextView name;
     private Button ok, not;
     private String filename;
@@ -42,9 +45,11 @@ public class BluetoothDialog extends AppCompatActivity implements View.OnClickLi
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ok_btn:
+                setResult(BLUETOOTH_OK);
                 finish();
                 break;
             case R.id.cancle_btn:
+                setResult(BLUETOOTH_NO);
                 finish();
                 break;
         }

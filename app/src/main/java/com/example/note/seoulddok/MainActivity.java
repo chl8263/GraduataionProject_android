@@ -37,6 +37,12 @@ import java.util.List;
  */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private final int BLUETOOTHDIALOG = 100;
+    private final int BLUETOOTH_OK = 200;
+    private final int BLUETOOTH_NO = 300;
+
+
     private final long FINISH_INTERVAL_TIME = 2000;
     private long backPressedTime = 0;
     private final int MY_PERMISSION_REQUEST_STORAGE = 100;
@@ -81,10 +87,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (view.getId()){
             case R.id.sub_fab2:
                 Intent intent = new Intent(this, BluetoothDialog.class);
-                startActivity(intent);
+                startActivityForResult(intent,BLUETOOTHDIALOG);
                 break;
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode){
+            case BLUETOOTH_OK :
+
+                firstFragment.disconnectService();
+                PahoClient.getInstance().stopPaho();
+                break;
+        }
     }
 
     public void init() {

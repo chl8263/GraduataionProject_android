@@ -35,26 +35,28 @@ public class PahoClient {
     private MqttAndroidClient client;
 
 
-    public PahoClient(){
+    public PahoClient() {
     }
 
-    private static class Holder{
+    private static class Holder {
         public static final PahoClient instance = new PahoClient();
     }
-    public static PahoClient getInstance(){
+
+    public static PahoClient getInstance() {
         return Holder.instance;
     }
 
-    public void setFragemntInstance(FirstFragment fragemntInstance , SecondFragment secondFragment){
+    public void setFragemntInstance(FirstFragment fragemntInstance, SecondFragment secondFragment) {
         this.firstFragment = fragemntInstance;
         this.secondFragment = secondFragment;
     }
-    public void setContext(Context context){
+
+    public void setContext(Context context) {
         this.context = context;
     }
 
-    public void  mqttConnect(){
-        client = new MqttAndroidClient(context, "tcp://"+Contact.connectIp+":1883", MqttClient.generateClientId());
+    public void mqttConnect() {
+        client = new MqttAndroidClient(context, "tcp://" + Contact.connectIp + ":1883", MqttClient.generateClientId());
         try {
             IMqttToken token = client.connect(getMqttConnectionOption());
             token.setActionCallback(new IMqttActionListener() {
@@ -62,7 +64,7 @@ public class PahoClient {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     client.setBufferOpts(getDisconnectedBufferOptions());
                     Log.e("Connect_success", "Success");
-                    Log.e("client__id",client.getClientId());
+                    Log.e("client__id", client.getClientId());
                 }
 
                 @Override
@@ -77,50 +79,55 @@ public class PahoClient {
             e.printStackTrace();
         }
     }
-    public void publich(String msg){
+
+    public void publich(String msg) {
         try {
-            client.publish("aaa",msg.getBytes(),0,true);
+            client.publish("aaa", msg.getBytes(), 0, true);
         } catch (MqttException e) {
             e.printStackTrace();
         }
     }
-    public void subscribe(final String topic){
+
+    public void subscribe(final String topic) {
         try {
-            client.subscribe(topic, 0, new IMqttMessageListener() {
-                @Override
-                public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    String msg = new String(mqttMessage.getPayload());
-                    String time = "";
-                    String date ="";
-                    date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
-                    time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+            if (client != null) {
+                client.subscribe(topic, 0, new IMqttMessageListener() {
+                    @Override
+                    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                        String msg = new String(mqttMessage.getPayload());
+                        String time = "";
+                        String date = "";
+                        date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                        time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                    Contact.dbManager.insertMobileData(date,time,msg);
-                    Log.e("subscribe ===>"+topic,msg);
+                        Contact.dbManager.insertMobileData(date, time, msg);
+                        Log.e("subscribe ===>" + topic, msg);
 
-                    final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+                        final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            for(int i=0;i<recvData.size();i++) {
-                                Log.e("chchchch", recvData.get(i).getDate()+"&&"+recvData.get(i).getTime()+"&&"+recvData.get(i).getMessage());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                for (int i = 0; i < recvData.size(); i++) {
+                                    Log.e("chchchch", recvData.get(i).getDate() + "&&" + recvData.get(i).getTime() + "&&" + recvData.get(i).getMessage());
+                                }
                             }
-                        }
-                    }).start();
+                        }).start();
 
-                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                        firstFragment.notified(new String(mqttMessage.getPayload()));
-                    }else {
-                        firstFragment.noti_landscape(msg);
+                        if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                            firstFragment.notified(new String(mqttMessage.getPayload()));
+                        } else {
+                            firstFragment.noti_landscape(msg);
+                        }
+
+
                     }
 
-
-
-
-                }
-            });
+                });
+            }
         } catch (MqttException e) {
+            e.printStackTrace();
+        }catch (Exception e){
             e.printStackTrace();
         }
     }
@@ -142,5 +149,14 @@ public class PahoClient {
         //mqttConnectOptions.setUserName("username");
         //mqttConnectOptions.setPassword("password".toCharArray());
         return mqttConnectOptions;
+    }
+
+    public void stopPaho() {
+        try {
+            PahoClient.getInstance().client.disconnect();
+        } catch (MqttException e) {
+            Log.e("paho disconnect", "paho 정지 실패");
+
+        }
     }
 }
