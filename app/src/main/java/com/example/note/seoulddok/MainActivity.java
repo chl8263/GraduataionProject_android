@@ -17,6 +17,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -39,8 +40,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final int BLUETOOTHDIALOG = 100;
-    private final int BLUETOOTH_OK = 200;
-    private final int BLUETOOTH_NO = 300;
+    private final int BLUETOOTH_CAR_OK = 200;
+    private final int BLUETOOTH_MOBILE_OK = 300;
+    private final int BLUETOOTH_NO = 400;
 
 
     private final long FINISH_INTERVAL_TIME = 2000;
@@ -53,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ThirdFragment thirdFragment;
     private PahoClient pahoClient;
 
-    private FloatingActionButton main_fab, sub_fab1 , sub_fab2;
-    private boolean isFABOpen=false;
+    private FloatingActionButton main_fab, sub_fab1, sub_fab2;
+    private boolean isFABOpen = false;
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -64,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
 
-        Contact.dbManager = new DBManager(getApplicationContext(),"SOUEL_DDOK",null,1); //db 초기화
+        Contact.dbManager = new DBManager(getApplicationContext(), "SOUEL_DDOK", null, 1); //db 초기화
         /*Contact.dbManager.dropMobileTable();
         Contact.dbManager.dropCarTable();*/
         Contact.dbManager.createTableMobile();
@@ -84,10 +86,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
             case R.id.sub_fab2:
                 Intent intent = new Intent(this, BluetoothDialog.class);
-                startActivityForResult(intent,BLUETOOTHDIALOG);
+                startActivityForResult(intent, BLUETOOTHDIALOG);
                 break;
         }
 
@@ -96,11 +98,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (resultCode){
-            case BLUETOOTH_OK :
-
-                firstFragment.disconnectService();
+        switch (resultCode) {
+            case BLUETOOTH_CAR_OK:
+                Contact.isSensor = false;
+                closeFABMenu();
+                //firstFragment.disconnectService();
                 PahoClient.getInstance().stopPaho();
+                break;
+            case BLUETOOTH_MOBILE_OK:
+                Contact.isSensor = true;
+                closeFABMenu();
+                PahoClient.getInstance().mqttConnect();
                 break;
         }
     }
@@ -109,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void initFab(){
+    public void initFab() {
         main_fab = findViewById(R.id.main_fab);
         sub_fab1 = findViewById(R.id.sub_fab1);
         sub_fab2 = findViewById(R.id.sub_fab2);
@@ -118,26 +126,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         main_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isFABOpen){
+                if (!isFABOpen) {
                     showFABMenu();
-                }else{
+                } else {
                     closeFABMenu();
                 }
             }
         });
     }
-    private void showFABMenu(){
-        isFABOpen=true;
+
+    private void showFABMenu() {
+        isFABOpen = true;
         sub_fab1.setVisibility(View.VISIBLE);
         sub_fab2.setVisibility(View.VISIBLE);
-
+        if (!Contact.isSensor) {
+            sub_fab2.setImageResource(R.drawable.smartphone);
+        }else{
+            sub_fab2.setImageResource(R.drawable.bluetooth_on);
+        }
         main_fab.animate().rotationBy(135);
         sub_fab1.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
         sub_fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_100));
     }
 
-    private void closeFABMenu(){
-        isFABOpen=false;
+    private void closeFABMenu() {
+        isFABOpen = false;
         main_fab.animate().rotationBy(-135);
         sub_fab1.animate().translationY(0);
         sub_fab2.animate().translationY(0);
@@ -149,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                if(!isFABOpen){
+                if (!isFABOpen) {
                     sub_fab1.setVisibility(View.GONE);
                     sub_fab2.setVisibility(View.GONE);
                 }
@@ -167,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
     @Override
     public void onBackPressed() {
         long tempTime = System.currentTimeMillis();
@@ -236,9 +250,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firstFragment = FirstFragment.getInstance();
         secondFragment = SecondFragment.getInstance();
         thirdFragment = ThirdFragment.getInstance();
-        firstFragment_land  = FirstFragment_land.getInstance();
+        firstFragment_land = FirstFragment_land.getInstance();
 
-        pahoClient.setFragemntInstance(firstFragment,secondFragment);
+        pahoClient.setFragemntInstance(firstFragment, secondFragment);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

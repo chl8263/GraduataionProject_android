@@ -3,9 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SeoulDDok.iml" filepath="$PROJECT_DIR$/SeoulDDok.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../../gyun_home/Desktop/SeoulDDok/SeoulDDok.iml" filepath="$PROJECT_DIR$/../../../gyun_home/Desktop/SeoulDDok/SeoulDDok.iml" />
+      <module fileurl="file://C:\Users\gyun_home\Desktop\SeoulDDok\SeoulDDok.iml" filepath="C:\Users\gyun_home\Desktop\SeoulDDok\SeoulDDok.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../../../gyun_home/Desktop/SeoulDDok/app/app.iml" filepath="$PROJECT_DIR$/../../../gyun_home/Desktop/SeoulDDok/app/app.iml" />
+      <module fileurl="file://C:\Users\gyun_home\Desktop\SeoulDDok\app\app.iml" filepath="C:\Users\gyun_home\Desktop\SeoulDDok\app\app.iml" />
     </modules>
   </component>
 </project>

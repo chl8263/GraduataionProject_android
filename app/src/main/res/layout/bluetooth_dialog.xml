@@ -23,6 +23,7 @@
             android:textColor="@color/colorBalck"
             android:textSize="13dp" />
         <TextView
+            android:id="@+id/blutoothdialogText"
             android:text="차량에 블루투스 연결을 하시겠습니까?"
             android:layout_weight="2"
             android:layout_width="match_parent"

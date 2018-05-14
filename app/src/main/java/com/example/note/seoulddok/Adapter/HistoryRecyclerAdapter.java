@@ -54,6 +54,11 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
+    public void notifyDataChange(ArrayList<Item> data){
+        this.data = data;
+        this.notifyDataSetChanged();
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         final Item item = data.get(position);

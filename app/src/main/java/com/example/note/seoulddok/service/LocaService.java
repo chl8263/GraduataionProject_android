@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.example.note.seoulddok.Contact;
 import com.example.note.seoulddok.interfaces.LocaCallback;
 import com.example.note.seoulddok.network.PahoClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -111,6 +112,13 @@ public class LocaService extends Service {
     private void startLocationUpdates() {
         myAsync.execute();
 
+    /*    new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        })*/
+
        /* LocationRequest locRequest = new LocationRequest();
         locRequest.setInterval(3000);
         locRequest.setFastestInterval(1500);
@@ -164,57 +172,60 @@ public class LocaService extends Service {
 
     public void stopServiceThread(){
         //myAsync.cancel();
-
+        //LocationServices.FusedLocationApi.removeLocationUpdates(mFusedLocationClient,mLocationCallback);
     }
     private class MyAsync extends AsyncTask{
         LocationRequest locRequest = new LocationRequest();
 
         @Override
         protected Object doInBackground(Object[] objects) {
-            locRequest.setInterval(3000);
-            locRequest.setFastestInterval(1500);
-            locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            mLocationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    super.onLocationResult(locationResult);
+            if(Contact.isSensor == true) {
+                locRequest.setInterval(3000);
+                locRequest.setFastestInterval(1500);
+                locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                mLocationCallback = new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        super.onLocationResult(locationResult);
+                        if(Contact.isSensor == true) {
+                            Log.e("now", locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
 
-                    Log.e("now",locationResult.getLastLocation().getLatitude()+" "+locationResult.getLastLocation().getLongitude());
-
-                    List<Address> list = null;
-                    double d1 = 0;
-                    double d2 = 0;
-                    try {
-                        d1 =locationResult.getLastLocation().getLatitude();
-                        d2 =locationResult.getLastLocation().getLongitude();
+                            List<Address> list = null;
+                            double d1 = 0;
+                            double d2 = 0;
+                            try {
+                                d1 = locationResult.getLastLocation().getLatitude();
+                                d2 = locationResult.getLastLocation().getLongitude();
 
 
-                        list = geocoder.getFromLocation(
-                                d1, // 위도
-                                d2, // 경도
-                                10); // 얻어올 값의 개수
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (list != null) {
-                        if (list.size()==0) {
-                        } else {
-                            Address address = (Address) list.get(0);
-                            String a = address.getAddressLine(0);
-                            String aa = address.getSubLocality();   // 구 알아오는 코드
-                            if(aa != null){
-                                pahoClient.subscribe(aa);
-                                Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ",aa);
-                                Log.e("noww",""+a+","+d1+","+d2);
+                                list = geocoder.getFromLocation(
+                                        d1, // 위도
+                                        d2, // 경도
+                                        10); // 얻어올 값의 개수
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
+                            if (list != null) {
+                                if (list.size() == 0) {
+                                } else {
+                                    Address address = (Address) list.get(0);
+                                    String a = address.getAddressLine(0);
+                                    String aa = address.getSubLocality();   // 구 알아오는 코드
+                                    if (aa != null) {
+                                        pahoClient.subscribe(aa);
+                                        Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ", aa);
+                                        Log.e("noww", "" + a + "," + d1 + "," + d2);
+                                    }
 
+                                }
+                            }
+                            LatLng NOW = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                            locaCallback.recv_loca("a", NOW);
                         }
-                    }
-                    LatLng NOW = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
-                    locaCallback.recv_loca("a", NOW);
 
-                }
-            };
+                    }
+                };
+            }
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return null;
             }

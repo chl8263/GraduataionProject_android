@@ -11,6 +11,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.example.note.seoulddok.Contact;
 import com.example.note.seoulddok.R;
 
 /**
@@ -18,10 +19,11 @@ import com.example.note.seoulddok.R;
  */
 
 public class BluetoothDialog extends AppCompatActivity implements View.OnClickListener {
-    private final int BLUETOOTH_OK = 200;
-    private final int BLUETOOTH_NO = 300;
+    private final int BLUETOOTH_CAR_OK = 200;
+    private final int BLUETOOTH_MOBILE_OK = 300;
+    private final int BLUETOOTH_NO = 400;
 
-    private TextView name;
+    private TextView blutoothdialogText;
     private Button ok, not;
     private String filename;
     private final String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/KNOCK_TALK";
@@ -33,19 +35,27 @@ public class BluetoothDialog extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.bluetooth_dialog);
         setFinishOnTouchOutside(false);
 
-        Intent intent = getIntent();
 
+        Intent intent = getIntent();
+        blutoothdialogText = findViewById(R.id.blutoothdialogText);
         ok = (Button) findViewById(R.id.ok_btn);
         ok.setOnClickListener(this);
         not = (Button) findViewById(R.id.cancle_btn);
         not.setOnClickListener(this);
+        if(!Contact.isSensor){
+            blutoothdialogText.setText("스마트폰 연결을 하시겠습니까 ?");
+        }
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ok_btn:
-                setResult(BLUETOOTH_OK);
+                if(Contact.isSensor){
+                    setResult(BLUETOOTH_CAR_OK);
+                }else {
+                    setResult(BLUETOOTH_MOBILE_OK);
+                }
                 finish();
                 break;
             case R.id.cancle_btn:

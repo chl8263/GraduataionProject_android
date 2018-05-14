@@ -1,5 +1,6 @@
 package com.example.note.seoulddok.ui;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,7 +33,7 @@ public class SecondFragment extends Fragment {
     public  final int CHILD = 1;
     private RecyclerView recyclerView;
     ArrayList<HistoryRecyclerAdapter.Item> data = new ArrayList<>();
-
+    private HistoryRecyclerAdapter historyRecyclerAdapter ;
     public SecondFragment() {
 
     }
@@ -47,11 +48,14 @@ public class SecondFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.secondfragment,container,false);
         setRecyclercView();
+        historyRecyclerAdapter = new HistoryRecyclerAdapter(data,view.getContext());
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(),LinearLayoutManager.VERTICAL,false));
-        recyclerView.setAdapter(new HistoryRecyclerAdapter(data,view.getContext()));
+        recyclerView.setAdapter(historyRecyclerAdapter);
         return view;
     }
+
+
 
     public void setRecyclercView(){
         ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
@@ -75,5 +79,24 @@ public class SecondFragment extends Fragment {
 
         }
 
+    }
+
+    public void addRecyclerView(){
+        AAA aaa = new AAA();
+        aaa.execute();
+    }
+    private class AAA extends AsyncTask{
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            setRecyclercView();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+            historyRecyclerAdapter.notifyDataChange(data);
+        }
     }
 }

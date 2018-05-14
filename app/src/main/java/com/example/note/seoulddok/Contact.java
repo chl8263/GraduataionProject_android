@@ -7,8 +7,11 @@ import com.example.note.seoulddok.DB.DBManager;
  */
 
 public class Contact {
-    public static String connectIp = "192.168.0.7";
+    //public static String connectIp = "192.168.0.7";
+    public static String connectIp = "192.168.219.100";
     public static DBManager dbManager;
+
+    public static boolean isSensor = true;
 
     public static final String[] PERMISSIONS = {
             "android.permission.MODIFY_AUDIO_SETTINGS",

@@ -119,7 +119,7 @@ public class PahoClient {
                         } else {
                             firstFragment.noti_landscape(msg);
                         }
-
+                        secondFragment.addRecyclerView();
 
                     }
 
