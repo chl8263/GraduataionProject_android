@@ -2,6 +2,9 @@ package com.example.note.seoulddok;
 
 import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -25,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.note.seoulddok.DB.DBManager;
 import com.example.note.seoulddok.dialog.BluetoothDialog;
+import com.example.note.seoulddok.network.BlueToothRecv;
 import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.FirstFragment_land;
@@ -32,12 +36,18 @@ import com.example.note.seoulddok.ui.SecondFragment;
 import com.example.note.seoulddok.ui.ThirdFragment;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Note on 2018-03-22.
  */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    BluetoothDevice bluetoothDevice = null;
+    UUID uuid = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
+
+    private BlueToothRecv blueToothRecv = null;
 
     private final int BLUETOOTHDIALOG = 100;
     private final int BLUETOOTH_CAR_OK = 200;
@@ -104,14 +114,53 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 closeFABMenu();
                 //firstFragment.disconnectService();
                 PahoClient.getInstance().stopPaho();
+
+                checkConnected();
+
                 break;
             case BLUETOOTH_MOBILE_OK:
                 Contact.isSensor = true;
                 closeFABMenu();
                 PahoClient.getInstance().mqttConnect();
+
+                blueToothRecv.socketclose();
+                blueToothRecv.interrupt();
                 break;
         }
     }
+
+    public void checkConnected() {
+        // true == headset connected && connected headset is support hands free
+        @SuppressLint("MissingPermission") int state = BluetoothAdapter.getDefaultAdapter().getProfileConnectionState(BluetoothProfile.HEADSET);
+        if (state != BluetoothProfile.STATE_CONNECTED)
+            return;
+        try {
+            BluetoothAdapter.getDefaultAdapter().getProfileProxy(getApplicationContext(), serviceListener, BluetoothProfile.HEADSET);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private BluetoothProfile.ServiceListener serviceListener = new BluetoothProfile.ServiceListener() {
+        @Override
+        public void onServiceDisconnected(int profile) {
+            blueToothRecv.socketclose();
+            blueToothRecv.interrupt();
+        }
+
+        @Override
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            for (BluetoothDevice device : proxy.getConnectedDevices()) {
+                Log.e("====================", "|" + device.getName() + " | " + device.getAddress() + " | " + proxy.getConnectionState(device) + "(connected = "
+                        + BluetoothProfile.STATE_CONNECTED + ")");
+                bluetoothDevice = device;
+            }
+            Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", "--------" + bluetoothDevice.getName());
+            BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy);
+            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid);
+            blueToothRecv.start();
+        }
+    };
 
     public void init() {
 

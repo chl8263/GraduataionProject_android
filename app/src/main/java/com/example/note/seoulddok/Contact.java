@@ -7,9 +7,16 @@ import com.example.note.seoulddok.DB.DBManager;
  */
 
 public class Contact {
+    public static String connectIp = "192.168.0.18";
     //public static String connectIp = "192.168.0.7";
-    public static String connectIp = "192.168.219.100";
+    //public static String connectIp = "223.194.132.46";
+    //public static String connectIp = "192.168.0.18";
     public static DBManager dbManager;
+
+    public static String loca_gu="";
+    public static String loca_ding="";
+
+    public static String ClientId=null;
 
     public static boolean isSensor = true;
 

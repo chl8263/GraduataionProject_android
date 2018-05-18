@@ -35,6 +35,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
@@ -212,9 +214,14 @@ public class LocaService extends Service {
                                     String a = address.getAddressLine(0);
                                     String aa = address.getSubLocality();   // 구 알아오는 코드
                                     if (aa != null) {
-                                        pahoClient.subscribe(aa);
-                                        Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ", aa);
-                                        Log.e("noww", "" + a + "," + d1 + "," + d2);
+                                        //pahoClient.subscribe(aa);
+                                        //Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ", aa);
+                                        //Log.e("noww", "" + a + "," + d1 + "," + d2);
+                                        if (Contact.ClientId != null){
+                                            String date = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date(System.currentTimeMillis()));
+                                            pahoClient.publichLoca(Contact.ClientId+","+d1+","+d2+","+date);
+                                        }
+
                                     }
 
                                 }

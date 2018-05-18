@@ -65,6 +65,8 @@ public class PahoClient {
                     client.setBufferOpts(getDisconnectedBufferOptions());
                     Log.e("Connect_success", "Success");
                     Log.e("client__id", client.getClientId());
+                    Contact.ClientId= client.getClientId();
+                    sub_ThisId();
                 }
 
                 @Override
@@ -80,9 +82,45 @@ public class PahoClient {
         }
     }
 
-    public void publich(String msg) {
+    public void publichLoca(String msg) {
         try {
-            client.publish("aaa", msg.getBytes(), 0, true);
+            client.publish("location", msg.getBytes(), 0, true);
+            Log.e("pupupupupupupu","pupupupupupuu");
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+    public void sub_ThisId(){
+        try {
+            client.subscribe(Contact.ClientId, 0, new IMqttMessageListener() {
+                @Override
+                public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                    if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        //firstFragment.notified(new String(mqttMessage.getPayload()));
+
+                        Log.e("IDIDIDIDIDIDI ------>",new String(mqttMessage.getPayload()));
+                        String message = new String(mqttMessage.getPayload());
+                        String [] a = message.split(",");
+                        if(a[0].equals("loc")){
+                            client.unsubscribe(Contact.loca_gu);
+                            client.unsubscribe(Contact.loca_ding);
+                            Contact.loca_gu = a[0];
+                            Contact.loca_ding = a[1];
+                            subscribe(a[1]);
+                            subscribe(a[2]);
+                        }else if(a[0].equals("sp")) {
+                            if(a[1].equals("emer")){
+
+                            }else if(a[1].equals("nomal")){
+
+                            }
+                        }
+
+                    } else {
+                        Log.e("IDIDIDIDIDIDI ------>",s);
+                    }
+                }
+            });
         } catch (MqttException e) {
             e.printStackTrace();
         }
