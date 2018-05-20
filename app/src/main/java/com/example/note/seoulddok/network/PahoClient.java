@@ -95,7 +95,9 @@ public class PahoClient {
             client.subscribe(Contact.ClientId, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+
+                    firstFragment.classifiNotified(new String(mqttMessage.getPayload()));
+                    /*if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                         //firstFragment.notified(new String(mqttMessage.getPayload()));
 
                         Log.e("IDIDIDIDIDIDI ------>",new String(mqttMessage.getPayload()));
@@ -118,7 +120,7 @@ public class PahoClient {
 
                     } else {
                         Log.e("IDIDIDIDIDIDI ------>",s);
-                    }
+                    }*/
                 }
             });
         } catch (MqttException e) {
@@ -152,12 +154,14 @@ public class PahoClient {
                             }
                         }).start();
 
-                        if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        firstFragment.classifiNotified(new String(mqttMessage.getPayload()));
+
+                        /*if (context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                             firstFragment.notified(new String(mqttMessage.getPayload()));
                         } else {
                             firstFragment.noti_landscape(msg);
                         }
-                        secondFragment.addRecyclerView();
+                        secondFragment.addRecyclerView();*/
 
                     }
 
@@ -166,6 +170,14 @@ public class PahoClient {
         } catch (MqttException e) {
             e.printStackTrace();
         }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void unSubscrive(String topic){
+        try {
+            client.unsubscribe(topic);
+        } catch (MqttException e) {
             e.printStackTrace();
         }
     }

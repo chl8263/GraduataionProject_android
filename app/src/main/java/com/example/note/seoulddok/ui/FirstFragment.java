@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
@@ -21,6 +22,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,6 +35,7 @@ import com.example.note.seoulddok.MainActivity;
 import com.example.note.seoulddok.R;
 import com.example.note.seoulddok.interfaces.LocaCallback;
 import com.example.note.seoulddok.interfaces.LocaShowCallback;
+import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.service.LocaService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -65,6 +71,9 @@ import java.util.Map;
 
 public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaShowCallback {
 
+    private final int EMERGENCY = 2000;
+    private final int NOMAL = 1000;
+
     private boolean MOVEALARM = false;
 
     private Handler handler = new Handler();
@@ -80,6 +89,9 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
 
     private Marker marker;
     private Marker submarker;
+
+    private LinearLayout showMSG;
+    private TextView showMSGText;
 
     private TextView notiText;
     //FusedLocationProviderClient mFusedLocationClient;
@@ -119,7 +131,14 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         View view = inflater.inflate(R.layout.firstfragment, container, false);
         mapView = (MapView) view.findViewById(R.id.Map);
         mapView.getMapAsync(this);
+
         notiText = view.findViewById(R.id.notiText);
+
+        showMSG = view.findViewById(R.id.viewMessage);
+        showMSGText = view.findViewById(R.id.viewMessageText);
+
+        showMSG.setVisibility(View.GONE);
+        //showMSG.setVisibility(View.GONE);
 
         /*mFusedLocationClient
                 = LocationServices.getFusedLocationProviderClient(getContext());*/
@@ -149,28 +168,92 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         //locaService.stopLocaService(connection);
     }
 
+    public void classifiNotified(String msg) {
+        String[] a = msg.split(",");
+        if (a[0].equals("loc")) {
+            PahoClient.getInstance().unSubscrive(Contact.loca_gu);
+            PahoClient.getInstance().unSubscrive(Contact.loca_dong);
+            Contact.loca_gu = a[1];
+            Contact.loca_dong = a[2];
+            PahoClient.getInstance().subscribe(a[1]);
+            PahoClient.getInstance().subscribe(a[2]);
+        } else if (a[0].equals("sp")) {
+            if (a[1].equals("emer")) {
+                try {
+                    double lat = Double.parseDouble(a[2]);
+                    double lang = Double.parseDouble(a[3]);
+                    //noti_landscape(EMERGENCY,a[4]);
+                    MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
+                    myAsyncTask.execute();
+                    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        notified(EMERGENCY,a[4]);
+                    } else {
+                        noti_landscape(EMERGENCY,a[4]);
+                    }
+                } catch (NumberFormatException e) {
+                    if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                        notified(EMERGENCY,a[2]);
+                    } else {
+                        noti_landscape(EMERGENCY,a[2]);
+                    }
+                }
+
+            } else if (a[1].equals("nomal")) {
+                if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                    notified(NOMAL,a[2]);
+                } else {
+                    noti_landscape(NOMAL,a[2]);
+                }
+            }
+        }
+    }
+
+
     @Override
-    public void notified(String msg) {
+    public void notified(int flag, String msg) {
         Log.e(">>>>>>.", msg);
 
-        /*NotificationCompat.Builder builder = new NotificationCompat.Builder(getActivity());
-        builder.setSmallIcon(R.drawable.global).setContentTitle("aaa").setContentText(msg);
-        NotificationManager notificationManager = (NotificationManager)getActivity().getSystemService(getActivity().NOTIFICATION_SERVICE);
-        notificationManager.notify(0,builder.build());*/
-        MyAsyncTask myAsyncTask = new MyAsyncTask(NONONO);
-        myAsyncTask.execute();
+        switch (flag) {
+            case NOMAL:
+                Log.e("notified--- NOMAL",msg);
+
+                new AlamTextThread(msg).start();
+
+               /* if (showMSG.getVisibility() == View.GONE) {
+                    showMSG.setVisibility(View.VISIBLE);
+                }*/
+                //showMSG.setText(msg);
+                break;
+            case EMERGENCY:
+                Log.e("notified--- EMERGENCY",msg);
+                new AlamTextThread(msg).start();
+
+                //showMSG.setVisibility(View.VISIBLE);
+                //showMSG.setText(msg);
+                break;
+        }
+
     }
 
     @Override
-    public void noti_landscape(String msg) {
+    public void noti_landscape(int flag, String msg) {
         Log.e("first_landscape-->", msg);
 
-        notiText.setText(msg);
+        switch (flag) {
+            case NOMAL:
+                notiText.setText(msg);
+                Log.e("notified--- NOMAL",msg);
+                break;
+            case EMERGENCY:
+                notiText.setText(msg);
+                Log.e("notified--- EMERGENCY",msg);
+                break;
+        }
 
-        MyAsyncTask myAsyncTask = new MyAsyncTask(NONONO);
-        myAsyncTask.execute();
-
+        /*MyAsyncTask myAsyncTask = new MyAsyncTask(NONONO);
+        myAsyncTask.execute();*/
     }
+
 
     LocaCallback locaCallback = new LocaCallback() {
         @Override
@@ -330,6 +413,63 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    private class AlamTextThread extends Thread{
+        private String message;
+
+        public AlamTextThread(String message){
+            this.message = message;
+        }
+        @Override
+        public void run() {
+            super.run();
+
+            new android.os.Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Animation animation_v = AnimationUtils.loadAnimation(getContext(), R.anim.write_animation_v);
+                    showMSG.startAnimation(animation_v);
+                    showMSG.setVisibility(View.VISIBLE);
+                    showMSGText.setText(message);
+                }
+            });
+
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            new android.os.Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    showMSG.setVisibility(View.GONE);
+                }
+            });
+
+        }
+    }
+
+    private class AlamTextASyncTask extends AsyncTask{
+        private String message;
+
+        public AlamTextASyncTask(String msg){
+            this.message = msg;
+        }
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            super.onPostExecute(o);
+
+
+        }
     }
 
     private class MyAsyncTask extends AsyncTask {

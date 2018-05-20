@@ -2,10 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/navi_first"
-        android:title="@string/navi_first" />
+        android:title="@string/navi_first"
+        android:icon="@drawable/ic_placeholder"
+        />
     <item
         android:id="@+id/navi_second"
-        android:title="@string/navi_second" />
+        android:title="@string/navi_second"
+        android:icon="@drawable/ic_list"
+        />
     <item
         android:id="@+id/navi_third"
         android:title="@string/navi_third" />

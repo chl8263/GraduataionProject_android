@@ -46,7 +46,7 @@ import java.util.concurrent.Executor;
  */
 
 public class LocaService extends Service {
-    private FusedLocationProviderClient locationProviderClient ;
+    private FusedLocationProviderClient locationProviderClient;
     private LocaCallback locaCallback;
 
 
@@ -55,7 +55,7 @@ public class LocaService extends Service {
     private MyAsync myAsync = new MyAsync();
 
     private FusedLocationProviderClient mFusedLocationClient;
-    private Geocoder geocoder= null;
+    private Geocoder geocoder = null;
     private LocationCallback mLocationCallback;
 
 
@@ -81,14 +81,16 @@ public class LocaService extends Service {
         mFusedLocationClient
                 = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
-        Log.e("????????","?????/////");
+        Log.e("????????", "?????/////");
         startLocationUpdates();
 
         return iBinder;
     }
-    public void gege(){
-        Log.e("aaaaaaaaaaa","aaaaaaaaaaa");
+
+    public void gege() {
+        Log.e("aaaaaaaaaaa", "aaaaaaaaaaa");
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -97,16 +99,18 @@ public class LocaService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("서비스 start","start Command 시작");
+        Log.e("서비스 start", "start Command 시작");
 
         return super.onStartCommand(intent, flags, startId);
     }
-    public void stopLocaService(ServiceConnection connection){
+
+    public void stopLocaService(ServiceConnection connection) {
         unbindService(connection);
     }
+
     @Override
     public void onDestroy() {
-        Log.e("서비스 destory","서비스 종료");
+        Log.e("서비스 destory", "서비스 종료");
 
         super.onDestroy();
     }
@@ -172,16 +176,17 @@ public class LocaService extends Service {
         mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());*/
     }
 
-    public void stopServiceThread(){
+    public void stopServiceThread() {
         //myAsync.cancel();
         //LocationServices.FusedLocationApi.removeLocationUpdates(mFusedLocationClient,mLocationCallback);
     }
-    private class MyAsync extends AsyncTask{
+
+    private class MyAsync extends AsyncTask {
         LocationRequest locRequest = new LocationRequest();
 
         @Override
         protected Object doInBackground(Object[] objects) {
-            if(Contact.isSensor == true) {
+            if (Contact.isSensor == true) {
                 locRequest.setInterval(3000);
                 locRequest.setFastestInterval(1500);
                 locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -189,7 +194,7 @@ public class LocaService extends Service {
                     @Override
                     public void onLocationResult(LocationResult locationResult) {
                         super.onLocationResult(locationResult);
-                        if(Contact.isSensor == true) {
+                        if (Contact.isSensor == true) {
                             Log.e("now", locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
 
                             List<Address> list = null;
@@ -217,9 +222,9 @@ public class LocaService extends Service {
                                         //pahoClient.subscribe(aa);
                                         //Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ", aa);
                                         //Log.e("noww", "" + a + "," + d1 + "," + d2);
-                                        if (Contact.ClientId != null){
+                                        if (Contact.ClientId != null) {
                                             String date = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date(System.currentTimeMillis()));
-                                            pahoClient.publichLoca(Contact.ClientId+","+d1+","+d2+","+date);
+                                            pahoClient.publichLoca(Contact.ClientId + "," + d1 + "," + d2 + "," + date);
                                         }
 
                                     }
@@ -243,8 +248,10 @@ public class LocaService extends Service {
         @SuppressLint("MissingPermission")
         @Override
         protected void onPostExecute(Object o) {
-            mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());
-
+            try {
+                mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());
+            } catch (NullPointerException e) {
+            }
 
         }
     }

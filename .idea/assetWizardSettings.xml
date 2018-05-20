@@ -28,8 +28,9 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="outputName" value="global" />
-                            <entry key="sourceFile" value="C:\Users\gyun-notebook" />
+                            <entry key="assetSourceType" value="FILE" />
+                            <entry key="outputName" value="ic_list" />
+                            <entry key="sourceFile" value="C:\Users\gyun-notebook\Desktop\list (1).svg" />
                           </map>
                         </option>
                       </PersistentState>

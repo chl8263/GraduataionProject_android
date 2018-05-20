@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", "--------" + bluetoothDevice.getName());
             BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy);
-            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid);
+            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid,firstFragment);
             blueToothRecv.start();
         }
     };
@@ -269,6 +269,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
     }
 
     //////////-------------/////////   fragmnt 설정부분    ////////////////------------------///////
