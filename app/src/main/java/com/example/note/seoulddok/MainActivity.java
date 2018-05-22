@@ -30,6 +30,7 @@ import com.example.note.seoulddok.DB.DBManager;
 import com.example.note.seoulddok.dialog.BluetoothDialog;
 import com.example.note.seoulddok.network.BlueToothRecv;
 import com.example.note.seoulddok.network.PahoClient;
+import com.example.note.seoulddok.service.PahoService;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.FirstFragment_land;
 import com.example.note.seoulddok.ui.SecondFragment;
@@ -82,16 +83,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Contact.dbManager.createTableMobile();
         Contact.dbManager.createTableCar();
 
-        pahoClient = PahoClient.getInstance();
+        /*pahoClient = PahoClient.getInstance();
         pahoClient.setContext(getApplicationContext());
-        pahoClient.mqttConnect();
+        pahoClient.mqttConnect();*/
 
         checkPermision(Contact.PERMISSIONS);
         init();
         initFab();
         initFragment();
 
-
+        Intent intent = new Intent(getApplicationContext(), PahoService.class);
+        startService(intent);
     }
 
     @Override
@@ -307,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         thirdFragment = ThirdFragment.getInstance();
         firstFragment_land = FirstFragment_land.getInstance();
 
-        pahoClient.setFragemntInstance(firstFragment, secondFragment);
+        //pahoClient.setFragemntInstance(firstFragment, secondFragment);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

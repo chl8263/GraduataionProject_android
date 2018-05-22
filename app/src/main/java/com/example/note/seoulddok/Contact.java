@@ -7,16 +7,20 @@ import com.example.note.seoulddok.DB.DBManager;
  */
 
 public class Contact {
+
+    public static String MAPMOVE = "MAPMOVE";
+    public static String MOVE_EMER = "MOVE_EMER";
+
+    public static String connectIp = "192.168.0.2";
     //public static String connectIp = "192.168.0.18";
-    public static String connectIp = "192.168.0.7";
-    //public static String connectIp = "223.194.132.46";
+    //public static String connectIp = "192.168.0.7";
     //public static String connectIp = "192.168.0.18";
     public static DBManager dbManager;
 
     public static String loca_gu="";
     public static String loca_dong="";
 
-    public static String ClientId=null;
+    public static String ClientId="paho1526978748858000000";
 
     public static boolean isSensor = true;
 

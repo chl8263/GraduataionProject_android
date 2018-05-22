@@ -1,12 +1,11 @@
 package com.example.note.seoulddok.ui;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -14,37 +13,22 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.example.note.seoulddok.Contact;
-import com.example.note.seoulddok.MainActivity;
 import com.example.note.seoulddok.R;
 import com.example.note.seoulddok.interfaces.LocaCallback;
 import com.example.note.seoulddok.interfaces.LocaShowCallback;
 import com.example.note.seoulddok.network.PahoClient;
-import com.example.note.seoulddok.service.LocaService;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
+import com.example.note.seoulddok.service.LocaServiceBind;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,12 +40,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 
@@ -69,7 +51,7 @@ import java.util.Map;
  * Created by gyun_home on 2018-03-18.
  */
 
-public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaShowCallback {
+public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaShowCallback, LocaCallback {
 
     private final int EMERGENCY = 2000;
     private final int NOMAL = 1000;
@@ -83,7 +65,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
 
     private MapView mapView = null;
     private GoogleMap map = null;
-    private LocaService locaService;
+    private LocaServiceBind locaService;
 
     boolean isService = false;
 
@@ -99,10 +81,10 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     //Geocoder geocoder = null;
 
 
-    ServiceConnection connection = new ServiceConnection() {
+    /*ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            LocaService.Locabinder locabinder = (LocaService.Locabinder) iBinder;
+            LocaServiceBind.Locabinder locabinder = (LocaServiceBind.Locabinder) iBinder;
             locaService = locabinder.getservice();
             locaService.registerCallback(locaCallback);
             isService = true;
@@ -112,7 +94,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         public void onServiceDisconnected(ComponentName componentName) {
             isService = false;
         }
-    };
+    };*/
 
     public FirstFragment() {
 
@@ -138,11 +120,12 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         showMSGText = view.findViewById(R.id.viewMessageText);
 
         showMSG.setVisibility(View.GONE);
+
+
         //showMSG.setVisibility(View.GONE);
 
-        /*mFusedLocationClient
-                = LocationServices.getFusedLocationProviderClient(getContext());*/
-        //geocoder = new Geocoder(getContext(), Locale.KOREA);
+        registerBroadCast();
+
         return view;
     }
 
@@ -154,8 +137,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         if (mapView != null) {
             mapView.onCreate(savedInstanceState);
         }
-        Intent intent = new Intent(getContext(), LocaService.class);
-        getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        /*Intent intent = new Intent(getContext(), LocaServiceBind.class);
+        getContext().bindService(intent, connection, Context.BIND_AUTO_CREATE);*/
         //startLocationUpdates();
 
 
@@ -166,6 +149,76 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         //locaService.stopServiceThread();
         //locaService.stopServiceThread(connection);
         //locaService.stopLocaService(connection);
+    }
+
+    private void registerBroadCast() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Contact.MAPMOVE);
+        getContext().registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Contact.MAPMOVE)) {
+                double lat = intent.getDoubleExtra("LAT", 0.0);
+                double lang = intent.getDoubleExtra("LANG", 0.0);
+                moveCamera(lat, lang);
+            } else if (intent.getAction().equals(Contact.MOVE_EMER)) {
+                double lat = intent.getDoubleExtra("LAT", 0.0);
+                double lang = intent.getDoubleExtra("LANG", 0.0);
+                String message = intent.getStringExtra("MSG");
+
+                MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
+                myAsyncTask.execute();
+
+            }
+        }
+    };
+
+    public void moveCamera(double lat, double lang) {
+        LatLng NOW = new LatLng(lat, lang);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NOW, 15);
+        if (map == null) {
+            Log.e("MAP NULL", "MAP NULL");
+        }
+        //map.animateCamera(cameraUpdate);
+        map.clear();
+        //map.clear(); //마커지우기
+        if (markerHashMap.containsKey("main")) {
+            Marker marker = (Marker) markerHashMap.get("main");
+            marker = map.addMarker(new MarkerOptions().position(NOW).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
+            if (markerHashMap.containsKey("sub")) {
+                Marker submarker = (Marker) markerHashMap.get("main");
+                submarker = map.addMarker(new MarkerOptions().position(NONONO).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
+                CircleOptions subcircle = new CircleOptions().center(NONONO) //원점
+                        .radius(300)      //반지름 단위 : m
+                        .strokeWidth(0f)  //선너비 0f : 선없음
+                        .fillColor(Color.parseColor("#880000ff")); //배경색
+                map.addCircle(subcircle);
+            }
+            Iterator iterator = markerHashMap.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator.next();
+                marker = (Marker) entry.getValue();
+                if (entry.getKey().equals("main")) {
+                    marker.setPosition(NOW);
+                } else {
+                    marker.setPosition(NONONO);
+                }
+            }
+            //marker.remove();
+            //marker.setPosition(NOW);
+        } else {
+            Log.e("-------------", "null");
+            marker = map.addMarker(new MarkerOptions().position(NOW).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
+            markerHashMap.put("main", marker);
+        }
+        //marker.remove();
+        //marker = null;
+        if (!MOVEALARM) {
+            map.animateCamera(cameraUpdate);
+        }
     }
 
     public void classifiNotified(String msg) {
@@ -186,23 +239,23 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                     MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
                     myAsyncTask.execute();
                     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        notified(EMERGENCY,a[4]);
+                        notified(EMERGENCY, a[4]);
                     } else {
-                        noti_landscape(EMERGENCY,a[4]);
+                        noti_landscape(EMERGENCY, a[4]);
                     }
                 } catch (NumberFormatException e) {
                     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                        notified(EMERGENCY,a[2]);
+                        notified(EMERGENCY, a[2]);
                     } else {
-                        noti_landscape(EMERGENCY,a[2]);
+                        noti_landscape(EMERGENCY, a[2]);
                     }
                 }
 
             } else if (a[1].equals("nomal")) {
                 if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    notified(NOMAL,a[2]);
+                    notified(NOMAL, a[2]);
                 } else {
-                    noti_landscape(NOMAL,a[2]);
+                    noti_landscape(NOMAL, a[2]);
                 }
             }
         }
@@ -215,9 +268,10 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
 
         switch (flag) {
             case NOMAL:
-                Log.e("notified--- NOMAL",msg);
+                Log.e("notified--- NOMAL", msg);
 
-                new AlamTextThread(msg).start();
+
+                //new AlamTextThread(msg).start();
 
                /* if (showMSG.getVisibility() == View.GONE) {
                     showMSG.setVisibility(View.VISIBLE);
@@ -225,8 +279,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                 //showMSG.setText(msg);
                 break;
             case EMERGENCY:
-                Log.e("notified--- EMERGENCY",msg);
-                new AlamTextThread(msg).start();
+                Log.e("notified--- EMERGENCY", msg);
+                //new AlamTextThread(msg).start();
 
                 //showMSG.setVisibility(View.VISIBLE);
                 //showMSG.setText(msg);
@@ -242,11 +296,11 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         switch (flag) {
             case NOMAL:
                 notiText.setText(msg);
-                Log.e("notified--- NOMAL",msg);
+                Log.e("notified--- NOMAL", msg);
                 break;
             case EMERGENCY:
                 notiText.setText(msg);
-                Log.e("notified--- EMERGENCY",msg);
+                Log.e("notified--- EMERGENCY", msg);
                 break;
         }
 
@@ -255,7 +309,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     }
 
 
-    LocaCallback locaCallback = new LocaCallback() {
+    /*LocaCallback locaCallback = new LocaCallback() {
         @Override
         public void recv_loca(String location, LatLng NOW) {
             Log.e("!!!!!!!", "!!!!!!!");
@@ -280,7 +334,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                     map.addCircle(subcircle);
                 }
 
-                /*Iterator iterator = markerHashMap.entrySet().iterator();
+                Iterator iterator = markerHashMap.entrySet().iterator();
                 while (iterator.hasNext()){
                     Map.Entry entry  = (Map.Entry) iterator.next();
                     Marker marker = (Marker) entry.getValue();
@@ -290,7 +344,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                     else {
                         marker.setPosition(NONONO);
                     }
-                }*/
+                }
                 //marker.remove();
                 //marker.setPosition(NOW);
             } else {
@@ -305,7 +359,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             }
 
         }
-    };
+    };*/
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -406,7 +460,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     public void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
-        getContext().unbindService(connection); // 앱종료시에 서비스 같이 종료
+        //getContext().unbindService(connection); // 앱종료시에 서비스 같이 종료
     }
 
     @Override
@@ -415,7 +469,12 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         mapView.onLowMemory();
     }
 
-    private class AlamTextThread extends Thread{
+    @Override
+    public void recv_loca(String location, LatLng latLng) {
+        Log.e("헤헤헤헤헤", "헤헤헤헤헹");
+    }
+
+    /*private class AlamTextThread extends Thread{
         private String message;
 
         public AlamTextThread(String message){
@@ -449,12 +508,12 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             });
 
         }
-    }
+    }*/
 
-    private class AlamTextASyncTask extends AsyncTask{
+    private class AlamTextASyncTask extends AsyncTask {
         private String message;
 
-        public AlamTextASyncTask(String msg){
+        public AlamTextASyncTask(String msg) {
             this.message = msg;
         }
 
@@ -472,11 +531,11 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         }
     }
 
-    private class MyAsyncTask extends AsyncTask {
+    private class EmerAsyncTask extends AsyncTask {
         private String targetLoca;
         private LatLng NOW;
 
-        public MyAsyncTask(LatLng NOW) {
+        public EmerAsyncTask(LatLng NOW) {
             this.NOW = NOW;
         }
 
@@ -493,50 +552,35 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             submarker = map.addMarker(new MarkerOptions().position(NONONO).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
 
             new AlarmThread(NOW).start();
-            /*CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NOW, 10);
-            map.animateCamera(cameraUpdate);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
 
-            CameraUpdate cameraUpdate2 = CameraUpdateFactory.newLatLngZoom(NONONO, 15);
-            map.animateCamera(cameraUpdate2);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-            MOVEALARM = false;*/
         }
     }
 
-    private class AlarmThread extends Thread {
+    private class EmerThread extends Thread {
         private LatLng latLng;
 
-        public AlarmThread(LatLng latLng) {
+        public EmerThread(LatLng latLng) {
             this.latLng = latLng;
         }
 
         @Override
         public void run() {
             super.run();
+
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NONONO, 15);
                     map.animateCamera(cameraUpdate);
+                }
+            });
+
+            markerHashMap.put("sub", submarker);
+            MOVEALARM = true;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    submarker = map.addMarker(new MarkerOptions().position(NONONO).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
                 }
             });
             try {

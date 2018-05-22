@@ -38,7 +38,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class LocaService extends Service {
+/**
+ * Created by gyun_home on 2018-03-19.
+ */
+
+public class LocaServiceBind extends Service {
     private FusedLocationProviderClient locationProviderClient;
     private LocaCallback locaCallback;
 
@@ -51,9 +55,14 @@ public class LocaService extends Service {
     private Geocoder geocoder = null;
     private LocationCallback mLocationCallback;
 
-    private Intent b_MAPMOVE = new Intent(Contact.MAPMOVE);
 
+    IBinder iBinder = new Locabinder();
 
+    public class Locabinder extends Binder {
+        public LocaServiceBind getservice() {
+            return LocaServiceBind.this;
+        }
+    }
 
     public void registerCallback(LocaCallback locaCallback) {
         this.locaCallback = locaCallback;
@@ -63,35 +72,37 @@ public class LocaService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.e("서비스 binder", "binder 시작");
 
-        return null;
-    }
-
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
         geocoder = new Geocoder(getApplicationContext(), Locale.ENGLISH);
         mFusedLocationClient
                 = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
         Log.e("????????", "?????/////");
         startLocationUpdates();
+        return iBinder;
+    }
+
+    public void gege() {
+        Log.e("aaaaaaaaaaa", "aaaaaaaaaaa");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("서비스 start", "start Command 시작");
 
-        geocoder = new Geocoder(getApplicationContext(), Locale.ENGLISH);
-        mFusedLocationClient
-                = LocationServices.getFusedLocationProviderClient(getApplicationContext());
-
-        Log.e("????????", "?????/////");
-        startLocationUpdates();
-        return START_STICKY_COMPATIBILITY;
+        return super.onStartCommand(intent, flags, startId);
     }
 
+    public void stopLocaService(ServiceConnection connection) {
+        unbindService(connection);
+    }
 
     @Override
     public void onDestroy() {
@@ -102,6 +113,68 @@ public class LocaService extends Service {
 
     private void startLocationUpdates() {
         myAsync.execute();
+
+    /*    new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+            }
+        })*/
+
+       /* LocationRequest locRequest = new LocationRequest();
+        locRequest.setInterval(3000);
+        locRequest.setFastestInterval(1500);
+        locRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+                Log.e("now",locationResult.getLastLocation().getLatitude()+" "+locationResult.getLastLocation().getLongitude());
+
+                List<Address> list = null;
+                double d1 = 0;
+                double d2 = 0;
+                try {
+                    d1 =locationResult.getLastLocation().getLatitude();
+                    d2 =locationResult.getLastLocation().getLongitude();
+
+
+                    list = geocoder.getFromLocation(
+                            d1, // 위도
+                            d2, // 경도
+                            10); // 얻어올 값의 개수
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (list != null) {
+                    if (list.size()==0) {
+                    } else {
+                        Address address = (Address) list.get(0);
+                        String a = address.getAddressLine(0);
+                        String aa = address.getSubLocality();   // 구 알아오는 코드
+                        if(aa != null){
+                            pahoClient.subscribe(aa);
+                            Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋ",aa);
+                            Log.e("noww",""+a+","+d1+","+d2);
+                        }
+
+                    }
+                }
+                LatLng NOW = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
+                locaCallback.recv_loca("a", NOW);
+
+            }
+        };
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationClient.requestLocationUpdates(locRequest, mLocationCallback, Looper.myLooper());*/
+    }
+
+    public void stopServiceThread() {
+        //myAsync.cancel();
+        //LocationServices.FusedLocationApi.removeLocationUpdates(mFusedLocationClient,mLocationCallback);
     }
 
     private class MyAsync extends AsyncTask {
@@ -156,7 +229,6 @@ public class LocaService extends Service {
                             }
                             LatLng NOW = new LatLng(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude());
                             locaCallback.recv_loca("a", NOW);
-                            notificationService();
                         }
 
                     }
@@ -180,8 +252,8 @@ public class LocaService extends Service {
         }
     }
 
-    public void notificationService() {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    public void notificationService(){
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 
         String id = "my_channel_01";
 
@@ -191,7 +263,7 @@ public class LocaService extends Service {
         int importance = NotificationManager.IMPORTANCE_HIGH;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(id, name, importance);
+            NotificationChannel channel = new NotificationChannel(id,name,importance);
 
             channel.setDescription(description);
             channel.enableLights(true);
@@ -200,14 +272,14 @@ public class LocaService extends Service {
 
             channel.enableVibration(true);
 
-            channel.setVibrationPattern(new long[]{100, 200, 300});
+            channel.setVibrationPattern(new long[]{100,200,300});
 
             notificationManager.createNotificationChannel(channel);
         }
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Notification notification = new Notification.Builder(this).setContentTitle("aaaaaaaa").setContentText("bbbbb").setSmallIcon(R.drawable.global).setChannelId(id).build();
-            notificationManager.notify(1, notification);
+            notificationManager.notify(1,notification);
         }
     }
 }
