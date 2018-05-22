@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,7 +31,6 @@ import com.example.note.seoulddok.network.BlueToothRecv;
 import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.service.PahoService;
 import com.example.note.seoulddok.ui.FirstFragment;
-import com.example.note.seoulddok.ui.FirstFragment_land;
 import com.example.note.seoulddok.ui.SecondFragment;
 import com.example.note.seoulddok.ui.ThirdFragment;
 
@@ -61,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int MY_PERMISSION_REQUEST_STORAGE = 100;
     private BottomNavigationView.OnNavigationItemSelectedListener onNavigationItemSelectedListener;
     private FirstFragment firstFragment;
-    private FirstFragment_land firstFragment_land;
     private SecondFragment secondFragment;
     private ThirdFragment thirdFragment;
     private PahoClient pahoClient;
@@ -307,7 +304,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         firstFragment = FirstFragment.getInstance();
         secondFragment = SecondFragment.getInstance();
         thirdFragment = ThirdFragment.getInstance();
-        firstFragment_land = FirstFragment_land.getInstance();
 
         //pahoClient.setFragemntInstance(firstFragment, secondFragment);
 
@@ -315,11 +311,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.add(R.id.fragment, firstFragment, "first");
-        fragmentTransaction.add(R.id.fragment, firstFragment_land, "first_land");
         fragmentTransaction.add(R.id.fragment, secondFragment, "second");
         fragmentTransaction.add(R.id.fragment, thirdFragment, "third");
 
-        fragmentTransaction.hide(firstFragment_land);
         fragmentTransaction.hide(secondFragment);
         fragmentTransaction.hide(thirdFragment);
         fragmentTransaction.commit();

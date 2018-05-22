@@ -67,6 +67,9 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     private GoogleMap map = null;
     private LocaServiceBind locaService;
 
+    private double currentLat;
+    private double currentLang;
+
     boolean isService = false;
 
     private Marker marker;
@@ -154,6 +157,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     private void registerBroadCast() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Contact.MAPMOVE);
+        intentFilter.addAction(Contact.MOVE_EMER);
         getContext().registerReceiver(broadcastReceiver, intentFilter);
     }
 
@@ -161,16 +165,19 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Contact.MAPMOVE)) {
-                double lat = intent.getDoubleExtra("LAT", 0.0);
-                double lang = intent.getDoubleExtra("LANG", 0.0);
-                moveCamera(lat, lang);
+                currentLat = intent.getDoubleExtra("LAT", 0.0);
+                currentLang = intent.getDoubleExtra("LANG", 0.0);
+                moveCamera(currentLat, currentLang);
             } else if (intent.getAction().equals(Contact.MOVE_EMER)) {
                 double lat = intent.getDoubleExtra("LAT", 0.0);
                 double lang = intent.getDoubleExtra("LANG", 0.0);
                 String message = intent.getStringExtra("MSG");
 
-                MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
-                myAsyncTask.execute();
+                Log.e("!!!!!!!","ssdssdsdsd");
+
+                LatLng latlang = new LatLng(lat, lang);
+                EmerThread emerThread = new EmerThread(latlang);
+                emerThread.start();
 
             }
         }
@@ -200,7 +207,6 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             Iterator iterator = markerHashMap.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry entry = (Map.Entry) iterator.next();
-                marker = (Marker) entry.getValue();
                 if (entry.getKey().equals("main")) {
                     marker.setPosition(NOW);
                 } else {
@@ -236,8 +242,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                     double lat = Double.parseDouble(a[2]);
                     double lang = Double.parseDouble(a[3]);
                     //noti_landscape(EMERGENCY,a[4]);
-                    MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
-                    myAsyncTask.execute();
+                    /*MyAsyncTask myAsyncTask = new MyAsyncTask(new LatLng(lat, lang));
+                    myAsyncTask.execute();*/
                     if (getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                         notified(EMERGENCY, a[4]);
                     } else {
@@ -460,6 +466,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     public void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+
+        getContext().unregisterReceiver(broadcastReceiver);
         //getContext().unbindService(connection); // 앱종료시에 서비스 같이 종료
     }
 
@@ -551,7 +559,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             super.onPostExecute(o);
             submarker = map.addMarker(new MarkerOptions().position(NONONO).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
 
-            new AlarmThread(NOW).start();
+            new EmerThread(NOW).start();
 
         }
     }
@@ -570,7 +578,22 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NONONO, 15);
+                    LatLng nowLang = new LatLng(currentLat,currentLang);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(nowLang, 12);
+                    map.animateCamera(cameraUpdate);
+                }
+            });
+
+            try {
+                Thread.sleep(700);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(NONONO, 12);
                     map.animateCamera(cameraUpdate);
                 }
             });

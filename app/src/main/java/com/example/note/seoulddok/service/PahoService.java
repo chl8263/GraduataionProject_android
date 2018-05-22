@@ -2,10 +2,15 @@ package com.example.note.seoulddok.service;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
@@ -17,7 +22,9 @@ import android.util.Log;
 
 import com.example.note.seoulddok.Contact;
 import com.example.note.seoulddok.Model.RecvData;
+import com.example.note.seoulddok.R;
 import com.example.note.seoulddok.interfaces.LocaCallback;
+import com.example.note.seoulddok.network.PahoClient;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -60,6 +67,13 @@ public class PahoService extends Service {
     private Intent b_MOVE_EMER = new Intent(Contact.MOVE_EMER);
 
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mqttConnect();
+
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -70,7 +84,6 @@ public class PahoService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("Paho Service start", "PahoService Command 시작");
 
-        mqttConnect();
 
         geocoder = new Geocoder(getApplicationContext(), Locale.ENGLISH);
         mFusedLocationClient
@@ -80,42 +93,47 @@ public class PahoService extends Service {
         return START_STICKY_COMPATIBILITY;
     }
 
-    public void unSubscrive(String topic){
-        try {
-            client.unsubscribe(topic);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void sub_ThisId(){
+
+    public void sub_ThisId() {
         try {
             client.subscribe(Contact.ClientId, 0, new IMqttMessageListener() {
                 @Override
                 public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-                    Log.e("subscribe this message","comeON!");
+                    Log.e("subscribe this message", "comeON!");
 
                     String msg = new String(mqttMessage.getPayload());
-                    String [] message = msg.split(",");
+                    String[] message = msg.split(",");
 
-                    if (message[0].equals("sp")) {
+
+                    if (message[0].equals("loc")) {
+                        unSubscrive(Contact.loca_gu);
+                        unSubscrive(Contact.loca_dong);
+                        Contact.loca_gu = message[1];
+                        Contact.loca_dong = message[2];
+                        subscribe(message[1]);
+                        subscribe(message[2]);
+                    } else if (message[0].equals("sp")) {
                         if (message[1].equals("emer")) {
                             try {
+
+                                Log.e("swwcwc", "응 맞아");
                                 double lat = Double.parseDouble(message[2]);
                                 double lang = Double.parseDouble(message[3]);
                                 //noti_landscape(EMERGENCY,a[4]);
                                 if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                    b_MOVE_EMER.putExtra("LAT",Double.parseDouble(message[2]));
-                                    b_MOVE_EMER.putExtra("LANG",Double.parseDouble(message[3]));
-                                    b_MOVE_EMER.putExtra("MSG",message[4]);
+                                    b_MOVE_EMER.putExtra("LAT", Double.parseDouble(message[2]));
+                                    b_MOVE_EMER.putExtra("LANG", Double.parseDouble(message[3]));
+                                    b_MOVE_EMER.putExtra("MSG", message[4]);
                                     sendBroadcast(b_MOVE_EMER);
-                                    //notified(EMERGENCY,a[4]);
+                                    notificationService(message[4]);
+
                                 } else {
                                     //noti_landscape(EMERGENCY,a[4]);
                                 }
                             } catch (NumberFormatException e) {
                                 if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                    //notified(EMERGENCY,a[2]);
+                                    notificationService(message[2]);
                                 } else {
                                     //noti_landscape(EMERGENCY,a[2]);
                                 }
@@ -123,9 +141,9 @@ public class PahoService extends Service {
 
                         } else if (message[1].equals("nomal")) {
                             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                //notified(NOMAL,a[2]);
+                                notificationService(message[2]);
                             } else {
-                                //noti_landscape(NOMAL,a[2]);
+                                notificationService(message[2]);
                             }
                         }
                     }
@@ -144,6 +162,9 @@ public class PahoService extends Service {
                     @Override
                     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                         String msg = new String(mqttMessage.getPayload());
+
+                        notificationService(msg);
+
                         String time = "";
                         String date = "";
                         date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
@@ -167,15 +188,23 @@ public class PahoService extends Service {
             }
         } catch (MqttException e) {
             e.printStackTrace();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void publish(String topic,String msg){
+    public void unSubscrive(String topic) {
+        try {
+            client.unsubscribe(topic);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void publish(String topic, String msg) {
         try {
             client.publish(topic, msg.getBytes(), 0, true);
-            Log.e("publish content----->",msg);
+            Log.e("publish content----->", msg);
 
         } catch (MqttException e) {
             e.printStackTrace();
@@ -192,9 +221,13 @@ public class PahoService extends Service {
                     client.setBufferOpts(getDisconnectedBufferOptions());
                     Log.e("Connect_success", "Success");
                     Log.e("client__id", client.getClientId());
-                    Contact.ClientId= client.getClientId();
+                    Contact.ClientId = client.getClientId();
 
-                    myAsync.execute();
+                    if (myAsync.isCancelled()) {
+
+                    }else {
+                        myAsync.execute();
+                    }
                     sub_ThisId();
                 }
 
@@ -229,6 +262,7 @@ public class PahoService extends Service {
         //mqttConnectOptions.setPassword("password".toCharArray());
         return mqttConnectOptions;
     }
+
     private class MyAsync extends AsyncTask {
         LocationRequest locRequest = new LocationRequest();
 
@@ -269,10 +303,10 @@ public class PahoService extends Service {
                                     if (aa != null) {
                                         if (Contact.ClientId != null) {
                                             String date = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date(System.currentTimeMillis()));
-                                            publish("location",Contact.ClientId + "," + d1 + "," + d2 + "," + date);
+                                            publish("location", Contact.ClientId + "," + d1 + "," + d2 + "," + date);
 
-                                            b_MAPMOVE.putExtra("LAT",d1);
-                                            b_MAPMOVE.putExtra("LANG",d2);
+                                            b_MAPMOVE.putExtra("LAT", d1);
+                                            b_MAPMOVE.putExtra("LANG", d2);
                                             sendBroadcast(b_MAPMOVE);
                                         }
                                     }
@@ -298,6 +332,37 @@ public class PahoService extends Service {
             } catch (NullPointerException e) {
             }
 
+        }
+    }
+
+    public void notificationService(String message) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String id = "my_channel_01";
+
+        CharSequence name = "aaaa";
+        String description = "bbb";
+
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(id, name, importance);
+
+            channel.setDescription(description);
+            channel.enableLights(true);
+
+            channel.setLightColor(Color.GREEN);
+
+            channel.enableVibration(true);
+
+            channel.setVibrationPattern(new long[]{100, 200, 300});
+
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Notification notification = new Notification.Builder(this).setContentTitle(message).setContentText("bbbbb").setSmallIcon(R.drawable.global).setChannelId(id).build();
+            notificationManager.notify(1, notification);
         }
     }
 }
