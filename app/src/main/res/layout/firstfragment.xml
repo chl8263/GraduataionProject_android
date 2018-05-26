@@ -8,20 +8,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <LinearLayout
-        android:id="@+id/viewMessage"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:background="@color/colorBalck"
-        >
 
-        <TextView
-            android:id="@+id/viewMessageText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textAlignment="center"
-            android:textSize="20sp"
-
-             />
-    </LinearLayout>
 </FrameLayout>

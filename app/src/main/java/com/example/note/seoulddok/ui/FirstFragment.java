@@ -8,13 +8,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -52,6 +57,8 @@ import java.util.Map;
  */
 
 public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaShowCallback, LocaCallback {
+
+    private int DIALOGCLICK = 0;
 
     private final int EMERGENCY = 2000;
     private final int NOMAL = 1000;
@@ -119,10 +126,20 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
 
         notiText = view.findViewById(R.id.notiText);
 
-        showMSG = view.findViewById(R.id.viewMessage);
-        showMSGText = view.findViewById(R.id.viewMessageText);
 
-        showMSG.setVisibility(View.GONE);
+        try {
+
+            DIALOGCLICK = 1;
+
+            double lat = Double.parseDouble(getActivity().getIntent().getStringExtra("LAT"));//intent.getDoubleExtra("LAT", 0.0);
+            double lang = Double.parseDouble(getActivity().getIntent().getStringExtra("LANG"));//intent.getDoubleExtra("LAT", 0.0);
+
+            NONONO = new LatLng(lat,lang);
+
+        }catch (NullPointerException e){
+            DIALOGCLICK = 0;
+            Log.e("~~~~~~","null");
+        }
 
 
         //showMSG.setVisibility(View.GONE);
@@ -175,8 +192,11 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
 
                 Log.e("!!!!!!!","ssdssdsdsd");
 
-                LatLng latlang = new LatLng(lat, lang);
-                EmerThread emerThread = new EmerThread(latlang);
+                /*LatLng latlang = new LatLng(lat, lang);
+                NONONO = new LatLng(lat);*/
+
+                NONONO = new LatLng(lat, lang);
+                EmerThread emerThread = new EmerThread(new LatLng(lat, lang));
                 emerThread.start();
 
             }
@@ -194,7 +214,8 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
         //map.clear(); //마커지우기
         if (markerHashMap.containsKey("main")) {
             Marker marker = (Marker) markerHashMap.get("main");
-            marker = map.addMarker(new MarkerOptions().position(NOW).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
+            //marker = map.addMarker(new MarkerOptions().position(NOW).icon(bitmapDescriptorFromVector(getActivity(),R.drawable.ic_position)).title("내위치!"));
+            marker = map.addMarker(new MarkerOptions().position(NOW).icon(BitmapDescriptorFactory.fromResource(R.drawable.ananan)).title("내위치!"));
             if (markerHashMap.containsKey("sub")) {
                 Marker submarker = (Marker) markerHashMap.get("main");
                 submarker = map.addMarker(new MarkerOptions().position(NONONO).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)).title("내위치!"));
@@ -371,8 +392,42 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
     public void onMapReady(GoogleMap googleMap) {
         Log.e("READY!!!!!!", "OOOOOOOOOOK");
 
+
         map = googleMap;
 
+        if(DIALOGCLICK == 1) {
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    try {
+                        Thread.sleep(3000);
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    double lat = Double.parseDouble(getActivity().getIntent().getStringExtra("LAT"));//intent.getDoubleExtra("LAT", 0.0);
+                                    double lang = Double.parseDouble(getActivity().getIntent().getStringExtra("LANG"));//intent.getDoubleExtra("LAT", 0.0);
+
+                                    DIALOGCLICK = 0;
+                                    LatLng latlang = new LatLng(lat, lang);
+                                    EmerThread emerThread = new EmerThread(latlang);
+                                    emerThread.start();
+                                }catch (NullPointerException e){
+                                    Log.e("~~~~~~","null");
+                                }
+                            }
+                        });
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            });
+
+        }
 
     }
 
@@ -585,7 +640,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             });
 
             try {
-                Thread.sleep(700);
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -607,7 +662,7 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                 }
             });
             try {
-                Thread.sleep(500);
+                Thread.sleep(1500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -631,6 +686,15 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
                 e.printStackTrace();
             }
         }
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }
 

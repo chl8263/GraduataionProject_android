@@ -5,9 +5,12 @@ import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -21,6 +24,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.example.note.seoulddok.Contact;
+import com.example.note.seoulddok.MainActivity;
 import com.example.note.seoulddok.Model.RecvData;
 import com.example.note.seoulddok.R;
 import com.example.note.seoulddok.interfaces.LocaCallback;
@@ -52,6 +56,13 @@ import java.util.Locale;
 
 public class PahoService extends Service {
 
+    private final int EMERFLAG = 3200;
+    private final int NOMALFLAG = 3300;
+
+    int intid = 1;
+    String id = String.valueOf(intid++);
+
+
     private FusedLocationProviderClient locationProviderClient;
     //private LocaCallback locaCallback;
 
@@ -70,7 +81,10 @@ public class PahoService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        registerBroadCast();
         mqttConnect();
+
+        myAsync.execute();
 
     }
 
@@ -94,7 +108,6 @@ public class PahoService extends Service {
     }
 
 
-
     public void sub_ThisId() {
         try {
             client.subscribe(Contact.ClientId, 0, new IMqttMessageListener() {
@@ -104,7 +117,6 @@ public class PahoService extends Service {
 
                     String msg = new String(mqttMessage.getPayload());
                     String[] message = msg.split(",");
-
 
                     if (message[0].equals("loc")) {
                         unSubscrive(Contact.loca_gu);
@@ -116,34 +128,112 @@ public class PahoService extends Service {
                     } else if (message[0].equals("sp")) {
                         if (message[1].equals("emer")) {
                             try {
-
                                 Log.e("swwcwc", "응 맞아");
                                 double lat = Double.parseDouble(message[2]);
                                 double lang = Double.parseDouble(message[3]);
-                                //noti_landscape(EMERGENCY,a[4]);
+
                                 if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                                     b_MOVE_EMER.putExtra("LAT", Double.parseDouble(message[2]));
                                     b_MOVE_EMER.putExtra("LANG", Double.parseDouble(message[3]));
                                     b_MOVE_EMER.putExtra("MSG", message[4]);
                                     sendBroadcast(b_MOVE_EMER);
-                                    notificationService(message[4]);
+
+                                    notificationService(EMERFLAG,message[2],message[3] ,message[4]);
+
+                                    String time = "";
+                                    String date = "";
+                                    date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                                    time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+
+                                    Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
+                                    Log.e("subscribe this ===>" , msg);
+
+                                    final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            for (int i = 0; i < recvData.size(); i++) {
+                                                Log.e("chchchch", recvData.get(i).getDate() + "&&" + recvData.get(i).getTime() + "&&" + recvData.get(i).getMessage());
+                                            }
+                                        }
+                                    }).start();
 
                                 } else {
-                                    //noti_landscape(EMERGENCY,a[4]);
+
                                 }
                             } catch (NumberFormatException e) {
                                 if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                    notificationService(message[2]);
+
+                                    notificationService(EMERFLAG,message[2],message[3], message[2]);
+
+                                    String time = "";
+                                    String date = "";
+                                    date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                                    time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+
+                                    Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
+                                    Log.e("subscribe this ===>" , msg);
+
+                                    final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            for (int i = 0; i < recvData.size(); i++) {
+                                                Log.e("chchchch", recvData.get(i).getDate() + "&&" + recvData.get(i).getTime() + "&&" + recvData.get(i).getMessage());
+                                            }
+                                        }
+                                    }).start();
+
                                 } else {
-                                    //noti_landscape(EMERGENCY,a[2]);
+
                                 }
                             }
 
                         } else if (message[1].equals("nomal")) {
                             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                notificationService(message[2]);
+                                notificationService(NOMALFLAG,"a" ,"a",message[2]);
+
+                                String time = "";
+                                String date = "";
+                                date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                                time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+
+                                Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
+                                Log.e("subscribe this ===>" , msg);
+
+                                final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        for (int i = 0; i < recvData.size(); i++) {
+                                            Log.e("chchchch", recvData.get(i).getDate() + "&&" + recvData.get(i).getTime() + "&&" + recvData.get(i).getMessage());
+                                        }
+                                    }
+                                }).start();
                             } else {
-                                notificationService(message[2]);
+                                notificationService(NOMALFLAG,"a" ,"a",message[2]);
+
+                                String time = "";
+                                String date = "";
+                                date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
+                                time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
+
+                                Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
+                                Log.e("subscribe this ===>" , msg);
+
+                                final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
+
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        for (int i = 0; i < recvData.size(); i++) {
+                                            Log.e("chchchch", recvData.get(i).getDate() + "&&" + recvData.get(i).getTime() + "&&" + recvData.get(i).getMessage());
+                                        }
+                                    }
+                                }).start();
                             }
                         }
                     }
@@ -163,14 +253,14 @@ public class PahoService extends Service {
                     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
                         String msg = new String(mqttMessage.getPayload());
 
-                        notificationService(msg);
+                        notificationService(NOMALFLAG, "a","a",msg);
 
                         String time = "";
                         String date = "";
                         date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
                         time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                        Contact.dbManager.insertMobileData(date, time, msg);
+                        Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
                         Log.e("subscribe ===>" + topic, msg);
 
                         final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
@@ -223,11 +313,7 @@ public class PahoService extends Service {
                     Log.e("client__id", client.getClientId());
                     Contact.ClientId = client.getClientId();
 
-                    if (myAsync.isCancelled()) {
 
-                    }else {
-                        myAsync.execute();
-                    }
                     sub_ThisId();
                 }
 
@@ -243,6 +329,28 @@ public class PahoService extends Service {
             e.printStackTrace();
         }
     }
+
+    private void registerBroadCast() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Contact.STARTCLIENT);
+        intentFilter.addAction(Contact.STOPCLIENT);
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Contact.STARTCLIENT)) {
+                mqttConnect();
+            } else if (intent.getAction().equals(Contact.STOPCLIENT)) {
+                try {
+                    client.disconnect();
+                } catch (MqttException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 
     private DisconnectedBufferOptions getDisconnectedBufferOptions() {
         DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
@@ -302,7 +410,7 @@ public class PahoService extends Service {
                                     String aa = address.getSubLocality();   // 구 알아오는 코드
                                     if (aa != null) {
                                         if (Contact.ClientId != null) {
-                                            String date = new SimpleDateFormat("yyyyMMddhhmmss").format(new Date(System.currentTimeMillis()));
+                                            String date = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date(System.currentTimeMillis()));
                                             publish("location", Contact.ClientId + "," + d1 + "," + d2 + "," + date);
 
                                             b_MAPMOVE.putExtra("LAT", d1);
@@ -335,10 +443,10 @@ public class PahoService extends Service {
         }
     }
 
-    public void notificationService(String message) {
+    public void notificationService(int flag , String LAT , String LANG, String message) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        String id = "my_channel_01";
+
 
         CharSequence name = "aaaa";
         String description = "bbb";
@@ -346,7 +454,7 @@ public class PahoService extends Service {
         int importance = NotificationManager.IMPORTANCE_HIGH;
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(id, name, importance);
+            NotificationChannel channel = new NotificationChannel(id, id, importance);
 
             channel.setDescription(description);
             channel.enableLights(true);
@@ -360,9 +468,40 @@ public class PahoService extends Service {
             notificationManager.createNotificationChannel(channel);
         }
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Notification notification = new Notification.Builder(this).setContentTitle(message).setContentText("bbbbb").setSmallIcon(R.drawable.global).setChannelId(id).build();
-            notificationManager.notify(1, notification);
+        switch (flag) {
+            case EMERFLAG:
+
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra("LAT",LAT);
+                intent.putExtra("LANG",LANG);
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                PendingIntent pi = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+
+                    Notification notification = new Notification.Builder(this).setContentTitle(message).setContentText("눌러서 확인").setSmallIcon(R.drawable.global).setChannelId(id).setContentIntent(pi).build();
+                    notificationManager.notify(intid, notification);
+                }
+
+                break;
+            case NOMALFLAG:
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    Notification notification = new Notification.Builder(this).setContentTitle(message).setContentText("").setSmallIcon(R.drawable.global).setChannelId(id).build();
+                    notificationManager.notify(intid, notification);
+                }
+                break;
         }
+
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(broadcastReceiver);
+
     }
 }

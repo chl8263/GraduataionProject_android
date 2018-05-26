@@ -86,8 +86,8 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                                 count++;
                             }
                             notifyItemRangeRemoved(pos + 1, count);
-                            //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_plus);
-                            itemController.btn_expand_toggle.animate().rotationBy(-450);
+                            itemController.btn_expand_toggle.setImageResource(R.drawable.second_left);
+                            //itemController.btn_expand_toggle.animate().rotationBy(-450);
 
 
                         } else {
@@ -98,7 +98,8 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                                 index++;
                             }
                             notifyItemRangeInserted(pos + 1, index - pos - 1);
-                            itemController.btn_expand_toggle.animate().rotationBy(450);
+                            itemController.btn_expand_toggle.setImageResource(R.drawable.second_down);
+                            //itemController.btn_expand_toggle.animate().rotationBy(450);
                             item.invisibleChildren = null;
                         }
                     }

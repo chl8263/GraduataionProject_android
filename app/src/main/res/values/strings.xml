@@ -2,5 +2,5 @@
     <string name="app_name">SeoulDDok</string>
     <string name="navi_first">Map</string>
     <string name="navi_second">History</string>
-    <string name="navi_third"></string>
+    <string name="navi_third">author</string>
 </resources>

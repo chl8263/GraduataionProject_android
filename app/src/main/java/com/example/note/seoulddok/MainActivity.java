@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.note.seoulddok.DB.DBManager;
@@ -53,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final int BLUETOOTH_MOBILE_OK = 300;
     private final int BLUETOOTH_NO = 400;
 
+    private Intent b_STARTCLIENT = new Intent(Contact.STARTCLIENT);
+    private Intent b_STOPCLIENT = new Intent(Contact.STOPCLIENT);
+
 
     private final long FINISH_INTERVAL_TIME = 2000;
     private long backPressedTime = 0;
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ThirdFragment thirdFragment;
     private PahoClient pahoClient;
 
+    private LinearLayout showMSGText;
     private FloatingActionButton main_fab, sub_fab1, sub_fab2;
     private boolean isFABOpen = false;
 
@@ -73,6 +79,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+
+
+
+
+
 
         Contact.dbManager = new DBManager(getApplicationContext(), "SOUEL_DDOK", null, 1); //db 초기화
         /*Contact.dbManager.dropMobileTable();
@@ -86,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         checkPermision(Contact.PERMISSIONS);
         init();
+        initStatusbar();
         initFab();
         initFragment();
 
@@ -111,19 +123,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case BLUETOOTH_CAR_OK:
                 Contact.isSensor = false;
                 closeFABMenu();
-                //firstFragment.disconnectService();
-                PahoClient.getInstance().stopPaho();
 
+                sendBroadcast(b_STOPCLIENT);
                 checkConnected();
+
+
+                showMSGText.setVisibility(View.VISIBLE);
 
                 break;
             case BLUETOOTH_MOBILE_OK:
                 Contact.isSensor = true;
                 closeFABMenu();
-                PahoClient.getInstance().mqttConnect();
 
+                sendBroadcast(b_STARTCLIENT);
+
+                showMSGText.setVisibility(View.GONE);
                 blueToothRecv.socketclose();
                 blueToothRecv.interrupt();
+                blueToothRecv = null;
                 break;
         }
     }
@@ -145,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onServiceDisconnected(int profile) {
             blueToothRecv.socketclose();
             blueToothRecv.interrupt();
+            blueToothRecv = null;
         }
 
         @Override
@@ -156,13 +174,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", "--------" + bluetoothDevice.getName());
             BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy);
-            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid,firstFragment);
+            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid,getApplicationContext());
             blueToothRecv.start();
         }
     };
 
     public void init() {
-
+        showMSGText = (LinearLayout)findViewById(R.id.viewMessage);
+        showMSGText.setVisibility(View.GONE);
     }
 
     public void initFab() {
@@ -248,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initStatusbar() {
         View view = getWindow().getDecorView();
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        getWindow().setStatusBarColor(Color.parseColor("#@color/colorPrimary"));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.colorMain));
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -273,6 +292,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        if(blueToothRecv != null) {
+            blueToothRecv.socketclose();
+            blueToothRecv.interrupt();
+            blueToothRecv = null;
+        }
 
     }
 

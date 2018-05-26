@@ -10,10 +10,14 @@ public class Contact {
 
     public static String MAPMOVE = "MAPMOVE";
     public static String MOVE_EMER = "MOVE_EMER";
+    public static String STOPCLIENT = "STOPCLIENT";
+    public static String STARTCLIENT = "STARTCLIENT";
 
-    public static String connectIp = "192.168.0.2";
+    //public static String connectIp = "223.194.134.162";
+    //public static String connectIp = "192.168.0.2";
     //public static String connectIp = "192.168.0.18";
     //public static String connectIp = "192.168.0.7";
+    public static String connectIp = "192.168.0.9";
     //public static String connectIp = "192.168.0.18";
     public static DBManager dbManager;
 

@@ -65,7 +65,20 @@ public class SecondFragment extends Fragment {
 
         int check = -1;
 
-        for(int i=0;i<recvData.size();i++){
+        /*for(int i=0;i<recvData.size();i++){
+            if(!checkTitle.containsKey(recvData.get(i).getDate())){
+                String title = recvData.get(i).getDate();
+                checkTitle.put(title,title);
+                data.add(new HistoryRecyclerAdapter.Item(HEADER,title));
+                check++;
+                data.get(check).invisibleChildren = new ArrayList<>();
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage()));
+            }else{
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage()));
+            }
+
+        }*/
+        for(int i=recvData.size()-1;i>0;i--){
             if(!checkTitle.containsKey(recvData.get(i).getDate())){
                 String title = recvData.get(i).getDate();
                 checkTitle.put(title,title);

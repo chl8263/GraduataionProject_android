@@ -12,5 +12,6 @@
         />
     <item
         android:id="@+id/navi_third"
+        android:icon="@drawable/ic_author_sign"
         android:title="@string/navi_third" />
 </menu>

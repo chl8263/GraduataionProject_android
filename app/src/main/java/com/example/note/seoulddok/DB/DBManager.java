@@ -39,19 +39,19 @@ public class DBManager extends SQLiteOpenHelper {
 
     public void createTableMobile (){
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("CREATE TABLE IF NOT EXISTS  MOBILE (id INTEGER PRIMARY KEY AUTOINCREMENT ,DATE TEXT NOT NULL, TIME TEXT NOT NULL , MESSAGE TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS  MOBILE (id INTEGER PRIMARY KEY AUTOINCREMENT ,DATE TEXT NOT NULL, TIME TEXT NOT NULL , MESSAGE TEXT NOT NULL,DISTINCTION TEXT NOT NULL , LATLANG TEXT NOT NULL)");
         db.close();
 
     }
     public void createTableCar (){
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("CREATE TABLE IF NOT EXISTS  CAR (id INTEGER PRIMARY KEY AUTOINCREMENT ,DATE TEXT NOT NULL ,TIME TEXT NOT NULL , MESSAGE TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS  CAR (id INTEGER PRIMARY KEY AUTOINCREMENT ,DATE TEXT NOT NULL ,TIME TEXT NOT NULL , MESSAGE TEXT NOT NULL,DISTINCTION TEXT NOT NULL , LATLANG TEXT NOT NULL)");
         db.close();
     }
 
-    public void insertMobileData(String date , String time  , String msg){
+    public void insertMobileData(String date , String time  , String msg , String distinction, String latlang){
         SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("INSERT INTO MOBILE (DATE,TIME,MESSAGE) VALUES ('"+date+"','"+time+"','"+msg+"')");
+        db.execSQL("INSERT INTO MOBILE (DATE,TIME,MESSAGE,DISTINCTION,LATLANG) VALUES ('"+date+"','"+time+"','"+msg+"','"+distinction+"','"+latlang+"')");
     }
 
     public ArrayList<RecvData> getRecvData(){

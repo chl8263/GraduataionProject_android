@@ -14,7 +14,7 @@
         android:gravity="left|center"
         android:paddingLeft="40dp"
         android:text="child"
-        android:textSize="15sp" />
+        android:textSize="12sp" />
 
     <TextView
         android:textColor="@color/colorBalck"
