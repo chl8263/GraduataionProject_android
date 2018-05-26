@@ -85,9 +85,9 @@ public class SecondFragment extends Fragment {
                 data.add(new HistoryRecyclerAdapter.Item(HEADER,title));
                 check++;
                 data.get(check).invisibleChildren = new ArrayList<>();
-                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage()));
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage(),recvData.get(i).getDistinction(),recvData.get(i).getLatlang()));
             }else{
-                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage()));
+                data.get(check).invisibleChildren.add(new HistoryRecyclerAdapter.Item(CHILD,recvData.get(i).getTime(),recvData.get(i).getMessage(),recvData.get(i).getDistinction(),recvData.get(i).getLatlang()));
             }
 
         }

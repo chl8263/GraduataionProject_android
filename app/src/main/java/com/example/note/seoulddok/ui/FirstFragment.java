@@ -188,7 +188,6 @@ public class FirstFragment extends Fragment implements OnMapReadyCallback, LocaS
             } else if (intent.getAction().equals(Contact.MOVE_EMER)) {
                 double lat = intent.getDoubleExtra("LAT", 0.0);
                 double lang = intent.getDoubleExtra("LANG", 0.0);
-                String message = intent.getStringExtra("MSG");
 
                 Log.e("!!!!!!!","ssdssdsdsd");
 

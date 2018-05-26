@@ -33,6 +33,9 @@
         <activity android:name=".dialog.BluetoothDialog"
             android:theme="@style/Theme.AppCompat.Dialog"
             />
+        <activity android:name=".dialog.HistoryDialog"
+            android:theme="@style/Theme.AppCompat.Dialog"
+            />
         <service android:name=".service.PahoService"/>
         <service android:name=".service.LocaService"/>
         <service android:name=".service.LocaServiceBind"/>

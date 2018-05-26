@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="200dp"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="3"
+        android:background="@drawable/box01"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/file_name"
+            android:layout_weight="3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/colorBalck"
+            android:textSize="13dp" />
+        <TextView
+            android:id="@+id/blutoothdialogText"
+            android:text="지난 위치를 보시겠습니까 ??"
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/colorBalck"
+            android:textSize="13dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/history_ok_btn"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_gravity="right"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/button_background"
+                android:text="예"
+                android:textColor="@color/colorBalck" />
+
+            <Button
+                android:id="@+id/history_cancle_btn"
+                android:layout_width="100dp"
+                android:layout_height="48dp"
+                android:layout_gravity="right"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/button_background"
+                android:text="아니요"
+                android:textColor="@color/colorBalck" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

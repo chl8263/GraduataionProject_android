@@ -2,6 +2,7 @@ package com.example.note.seoulddok.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import com.example.note.seoulddok.Model.ExpandableItem;
 import com.example.note.seoulddok.Model.RecvData;
 import com.example.note.seoulddok.R;
+import com.example.note.seoulddok.dialog.HistoryDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,16 +24,16 @@ import java.util.List;
  * Created by gyun_home on 2018-05-12.
  */
 
-public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class HistoryRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int HEADER = 0;
     public static final int CHILD = 1;
-    private final int EXISTENCE=3;
-    private final int NONEXISTENCE=4;
+    private final int EXISTENCE = 3;
+    private final int NONEXISTENCE = 4;
     private ArrayList<Item> data;
     private Context context;
 
-    public HistoryRecyclerAdapter(ArrayList<Item>data, Context context){
-        this.context =context;
+    public HistoryRecyclerAdapter(ArrayList<Item> data, Context context) {
+        this.context = context;
         this.data = data;
     }
 
@@ -54,7 +56,7 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
         return null;
     }
 
-    public void notifyDataChange(ArrayList<Item> data){
+    public void notifyDataChange(ArrayList<Item> data) {
         this.data = data;
         this.notifyDataSetChanged();
     }
@@ -66,7 +68,7 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
             case HEADER:
                 final HeaderViewHolder itemController = (HeaderViewHolder) holder;
                 itemController.redderalItem = item;
-                Log.e("########",item.date);
+                Log.e("########", item.date);
                 itemController.header_title.setText(item.date);
                 if (item.invisibleChildren == null) {
                     //itemController.btn_expand_toggle.setImageResource(R.drawable.circle_minus);
@@ -107,6 +109,9 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                 break;
             case CHILD:
                 final ChildViewHolder itemChild_Controller = (ChildViewHolder) holder;
+                if(data.get(position).distinction == "emer"){
+                    itemChild_Controller.childTime.setTextColor(Color.RED);
+                }
                 itemChild_Controller.childTime.setText(data.get(position).time);
                 itemChild_Controller.childMsg.setText(data.get(position).message);
 
@@ -115,23 +120,17 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
                 }else if(data.get(position).i==EXISTENCE){
                     itemChild_Controller.imageView.setImageResource(R.drawable.video_ok);
                 }
-                itemChild_Controller.imageView.setOnClickListener(new View.OnClickListener() {
+                */
+                itemChild_Controller.childMsg.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (data.get(position).i==NONEXISTENCE) {
-                            Log.e("asd", (String) itemChild_Controller.textView.getText()+"not");
-                            Intent intent =new Intent(context.getApplicationContext(), First_NOT_DIalog.class);
-                            intent.putExtra("name",(String) itemChild_Controller.textView.getText());
-                            view.getContext().startActivity(intent);
-                        }
-                        else if (data.get(position).i==EXISTENCE) {
-                            Log.e("asd", (String) itemChild_Controller.textView.getText()+"OK");
-                            Intent intent =new Intent(context.getApplicationContext(), First_OK_Dialog.class);
-                            intent.putExtra("name",(String) itemChild_Controller.textView.getText());
+                        if (data.get(position).distinction == "emer") {
+                            Intent intent = new Intent(context.getApplicationContext(), HistoryDialog.class);
+                            intent.putExtra("latlang",data.get(position).latlang);
                             view.getContext().startActivity(intent);
                         }
                     }
-                });*/
+                });
                 break;
         }
     }
@@ -146,7 +145,7 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
         return data.size();
     }
 
-    public class HeaderViewHolder extends RecyclerView.ViewHolder{
+    public class HeaderViewHolder extends RecyclerView.ViewHolder {
         public TextView header_title;
         public ImageView btn_expand_toggle;
         public Item redderalItem;
@@ -159,22 +158,24 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    public class ChildViewHolder extends RecyclerView.ViewHolder{
+    public class ChildViewHolder extends RecyclerView.ViewHolder {
         public TextView childTime;
         public TextView childMsg;
 
         public ChildViewHolder(View itemView) {
             super(itemView);
             childTime = itemView.findViewById(R.id.chile_time);
-            childMsg =  itemView.findViewById(R.id.child_message);
+            childMsg = itemView.findViewById(R.id.child_message);
         }
     }
-    public static class Item {
+
+    /*public static class Item {
         public int type;
         public String date;
         public String time;
         public String message;
         public List<Item> invisibleChildren;
+
 
         public Item() {
 
@@ -188,6 +189,33 @@ public class HistoryRecyclerAdapter extends  RecyclerView.Adapter<RecyclerView.V
             this.type = type;
             this.time = time;
             this.message = message;
+        }
+    }*/
+    public static class Item {
+        public int type;
+        public String date;
+        public String time;
+        public String message;
+        private String distinction;
+        private String latlang;
+        public List<Item> invisibleChildren;
+
+
+        public Item() {
+
+        }
+
+        public Item(int type, String date) {
+            this.type = type;
+            this.date = date;
+        }
+
+        public Item(int type, String time, String message, String distinction, String latlang) {
+            this.type = type;
+            this.time = time;
+            this.message = message;
+            this.distinction = distinction;
+            this.latlang = latlang;
         }
     }
 }
