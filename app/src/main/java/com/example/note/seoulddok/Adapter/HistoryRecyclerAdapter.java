@@ -109,8 +109,10 @@ public class HistoryRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 break;
             case CHILD:
                 final ChildViewHolder itemChild_Controller = (ChildViewHolder) holder;
-                if(data.get(position).distinction == "emer"){
-                    itemChild_Controller.childTime.setTextColor(Color.RED);
+                if(data.get(position).distinction.equals("emer")){
+                    itemChild_Controller.childMsg.setTextColor(Color.RED);
+                }else {
+                    itemChild_Controller.childMsg.setTextColor(Color.BLACK);
                 }
                 itemChild_Controller.childTime.setText(data.get(position).time);
                 itemChild_Controller.childMsg.setText(data.get(position).message);
@@ -124,7 +126,7 @@ public class HistoryRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 itemChild_Controller.childMsg.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (data.get(position).distinction == "emer") {
+                        if (data.get(position).distinction.equals("emer")) {
                             Intent intent = new Intent(context.getApplicationContext(), HistoryDialog.class);
                             intent.putExtra("latlang",data.get(position).latlang);
                             view.getContext().startActivity(intent);

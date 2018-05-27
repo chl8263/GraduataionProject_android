@@ -21,6 +21,7 @@ public class HistoryDialog extends AppCompatActivity implements View.OnClickList
     private double lang;
 
     private Intent b_MOVE_EMER = new Intent(Contact.MOVE_EMER);
+    private Intent b_MAPFIRST = new Intent(Contact.MAPFIRST);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,12 +49,14 @@ public class HistoryDialog extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.ok_btn:
+            case R.id.history_ok_btn:
                 b_MOVE_EMER.putExtra("LAT", lat);
                 b_MOVE_EMER.putExtra("LANG", lang);
                 sendBroadcast(b_MOVE_EMER);
+                sendBroadcast(b_MAPFIRST);
+                finish();
                 break;
-            case R.id.cancle_btn:
+            case R.id.history_cancle_btn:
                 finish();
                 break;
         }

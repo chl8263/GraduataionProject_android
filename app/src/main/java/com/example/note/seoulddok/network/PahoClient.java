@@ -140,7 +140,7 @@ public class PahoClient {
                         date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
                         time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                        Contact.dbManager.insertMobileData(date, time, msg);
+                        Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
                         Log.e("subscribe ===>" + topic, msg);
 
                         final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();

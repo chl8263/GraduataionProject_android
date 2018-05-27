@@ -145,7 +145,7 @@ public class PahoService extends Service {
                                     date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
                                     time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                                    Contact.dbManager.insertMobileData(date, time, msg,"emer",message[2]+","+message[3]);
+                                    Contact.dbManager.insertMobileData(date, time, message[4],"emer",message[2]+","+message[3]);
                                     Log.e("subscribe this ===>" , msg);
 
                                     final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();
@@ -200,7 +200,7 @@ public class PahoService extends Service {
                                 date = new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis()));
                                 time = new SimpleDateFormat("HH:mm:ss").format(new Date(System.currentTimeMillis()));
 
-                                Contact.dbManager.insertMobileData(date, time, msg,"nomal","null");
+                                Contact.dbManager.insertMobileData(date, time, message[2],"nomal","null");
                                 Log.e("subscribe this ===>" , msg);
 
                                 final ArrayList<RecvData> recvData = Contact.dbManager.getRecvData();

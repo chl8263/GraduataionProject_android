@@ -7,7 +7,7 @@ import com.example.note.seoulddok.DB.DBManager;
  */
 
 public class Contact {
-
+    public static String MAPFIRST = "MAPFIRST";
     public static String MAPMOVE = "MAPMOVE";
     public static String MOVE_EMER = "MOVE_EMER";
     public static String STOPCLIENT = "STOPCLIENT";

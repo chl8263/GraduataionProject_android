@@ -5,7 +5,10 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -13,6 +16,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.internal.BottomNavigationMenu;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -35,6 +39,7 @@ import com.example.note.seoulddok.service.PahoService;
 import com.example.note.seoulddok.ui.FirstFragment;
 import com.example.note.seoulddok.ui.SecondFragment;
 import com.example.note.seoulddok.ui.ThirdFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +49,10 @@ import java.util.UUID;
  */
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private FragmentManager fragmentManager;
+    private FragmentTransaction fragmentTransaction;
+    private BottomNavigationView navigationView;
 
     BluetoothDevice bluetoothDevice = null;
     UUID uuid = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
@@ -81,10 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 
-
-
-
-
         Contact.dbManager = new DBManager(getApplicationContext(), "SOUEL_DDOK", null, 1); //db 초기화
         /*Contact.dbManager.dropMobileTable();
         Contact.dbManager.dropCarTable();*/
@@ -103,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         Intent intent = new Intent(getApplicationContext(), PahoService.class);
         startService(intent);
+        registerBroadCast();
+
     }
 
     @Override
@@ -145,6 +152,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void registerBroadCast() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Contact.MAPFIRST);
+        registerReceiver(broadcastReceiver, intentFilter);
+    }
+
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Contact.MAPFIRST)) {
+                Log.e("aaaaaaaaaa", "@#@#@#@#@@@#@");
+                SelectNavView("first");
+
+                navigationView.getMenu().getItem(2).setChecked(true);
+                navigationView.getMenu().getItem(1).setChecked(false);
+                navigationView.getMenu().getItem(0).setChecked(false);
+            }
+        }
+    };
+
     public void checkConnected() {
         // true == headset connected && connected headset is support hands free
         @SuppressLint("MissingPermission") int state = BluetoothAdapter.getDefaultAdapter().getProfileConnectionState(BluetoothProfile.HEADSET);
@@ -174,13 +201,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             Log.e("ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ", "--------" + bluetoothDevice.getName());
             BluetoothAdapter.getDefaultAdapter().closeProfileProxy(profile, proxy);
-            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid,getApplicationContext());
+            blueToothRecv = new BlueToothRecv(bluetoothDevice, uuid, getApplicationContext());
             blueToothRecv.start();
         }
     };
 
     public void init() {
-        showMSGText = (LinearLayout)findViewById(R.id.viewMessage);
+        showMSGText = (LinearLayout) findViewById(R.id.viewMessage);
         showMSGText.setVisibility(View.GONE);
     }
 
@@ -208,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sub_fab2.setVisibility(View.VISIBLE);
         if (!Contact.isSensor) {
             sub_fab2.setImageResource(R.drawable.smartphone);
-        }else{
+        } else {
             sub_fab2.setImageResource(R.drawable.bluetooth_on);
         }
         main_fab.animate().rotationBy(135);
@@ -293,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
 
-        if(blueToothRecv != null) {
+        if (blueToothRecv != null) {
             blueToothRecv.socketclose();
             blueToothRecv.interrupt();
             blueToothRecv = null;
@@ -332,8 +359,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //pahoClient.setFragemntInstance(firstFragment, secondFragment);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentManager = getSupportFragmentManager();
+        fragmentTransaction = fragmentManager.beginTransaction();
 
         fragmentTransaction.add(R.id.fragment, firstFragment, "first");
         fragmentTransaction.add(R.id.fragment, secondFragment, "second");
@@ -343,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fragmentTransaction.hide(thirdFragment);
         fragmentTransaction.commit();
 
-        BottomNavigationView navigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
+        navigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         navigationView.setOnNavigationItemSelectedListener(onNavigationItemSelectedListener);
     }
 
